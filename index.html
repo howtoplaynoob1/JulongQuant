@@ -44,6 +44,7 @@
     display: flex; align-items: center; gap: 8px;
   }
   .nav-logo span { color: var(--accent); }
+  .brand-icon { width: 30px; height: 30px; object-fit: contain; display: block; }
   .nav-tabs { display: flex; gap: 4px; }
   .nav-tab {
     padding: 8px 16px; border-radius: 6px; cursor: pointer;
@@ -245,7 +246,7 @@
 
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">巨龙<span>量化</span></div>
+    <div class="nav-logo"><img class="brand-icon" src="icon.png" alt="JuLong Quant" /><span>JuLong Quant</span></div>
     <div class="nav-tabs">
       <div class="nav-tab active" data-page="dashboard">首页</div>
       <div class="nav-tab" data-page="regime">市场状态</div>

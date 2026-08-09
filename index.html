@@ -154,6 +154,16 @@
   .profile-label { color: var(--text-secondary); margin-bottom: 2px; font-size: 12px; }
   .profile-value { color: var(--text); font-weight: 500; }
   .about-copyright { font-size: 13px; color: var(--text-secondary); margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .about-hero { padding: 8px 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 26px; }
+  .about-kicker { color: var(--accent); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+  .about-hero h2 { font-size: 28px; letter-spacing: -0.03em; margin-bottom: 10px; }
+  .about-lead { color: var(--text-secondary); font-size: 15px; max-width: 760px; line-height: 1.9; }
+  .about-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 16px 0 28px; }
+  .about-card { padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fafbfc; }
+  .about-card-title { font-size: 13px; font-weight: 600; margin-bottom: 7px; }
+  .about-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.75; }
+  .architecture { background: #202733; color: #e9eef6; border-radius: 9px; padding: 20px 22px; overflow-x: auto; font: 12px/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+  .about-note { margin-top: 24px; padding: 14px 16px; border-left: 3px solid var(--accent); background: rgba(74,127,193,0.06); color: var(--text-secondary); font-size: 13px; line-height: 1.8; }
 
   /* ── Footer ── */
   .global-footer {
@@ -230,6 +240,8 @@
     .chart-header h3 { font-size: 14px; }
     .chart-hint { display: none; }
     .about-profile { flex-direction: column; gap: 16px; }
+    .about-grid { grid-template-columns: 1fr; }
+    .about-hero h2 { font-size: 23px; }
     .info-section p { font-size: 13px; }
     .pf-cards { gap: 8px; }
     .pf-card { min-width: 100px; padding: 10px 6px; }
@@ -383,28 +395,48 @@
   <!-- About -->
   <div class="page" id="page-about">
     <div class="card">
-      <div class="about-section">
-        <h3>巨龙量化</h3>
-        <p>专注中证 500 + 1000 指数跟随策略的个人量化项目。通过系统化的因子研究和回测框架，在中证中小盘指数成分股中寻找超额收益机会。</p>
-      </div>
-      <div class="about-section">
-        <h3>市场状态识别</h3>
-        <p>基于多维度趋势、广度与波动率信号，将市场划分为四种状态（低波动牛市 / 高波动牛市 / 低波动熊市 / 高波动熊市），辅助择时与仓位决策。本页面为该模块的可视化展示。</p>
-      </div>
-      <div class="about-profile">
-        <div class="profile-item">
-          <div class="profile-label">ID</div>
-          <div class="profile-value">（待填写）</div>
+      <section class="about-hero">
+        <div class="about-kicker">JuLong Quant · Research System</div>
+        <h2>巨龙量化</h2>
+        <p class="about-lead">面向 A 股中小盘股票的量化研究与策略执行框架。项目将因子研究、模型预测、组合构建、真实交易约束回测和交易日更新串联为一套可复现的研究流程，致力于用纪律化的方法寻找风险调整后的超额收益机会。</p>
+      </section>
+
+      <section class="about-section">
+        <h3>核心能力</h3>
+        <div class="about-grid">
+          <div class="about-card"><div class="about-card-title">因子与数据</div><p>整合 CSMAR、Tushare 与指数数据，构建统一日频面板与因子特征体系。</p></div>
+          <div class="about-card"><div class="about-card-title">模型集成</div><p>结合树模型与时序模型，使用稳定集成与平滑排序生成股票预测信号。</p></div>
+          <div class="about-card"><div class="about-card-title">组合与风控</div><p>以预算仓位、固定缓冲与市场状态防御机制管理换手、回撤和风险暴露。</p></div>
         </div>
-        <div class="profile-item">
-          <div class="profile-label">简介</div>
-          <div class="profile-value">（待填写）</div>
+      </section>
+
+      <section class="about-section">
+        <h3>系统结构</h3>
+        <div class="architecture">JulongQuant/
+├── src/
+│   ├── backtest/      账户级回测、组合、指标与交易约束
+│   ├── models/        树模型与时序模型库
+│   ├── experiment/    实验配置、数据处理与训练运行
+│   ├── pipeline/      实盘数据、因子面板与数据服务
+│   └── predict/       日频预测与增量预测
+├── scripts/
+│   ├── dataset/       数据更新、实盘流水线与后处理
+│   └── evaluation/    策略评估、网格搜索与诊断
+├── dataset/           原始数据、处理数据与本地缓存
+├── reports/           策略证据、诊断报告与净值曲线
+└── website/           市场状态与实盘组合可视化看板</div>
+      </section>
+
+      <section class="about-section">
+        <h3>研究与运行流程</h3>
+        <div class="about-grid">
+          <div class="about-card"><div class="about-card-title">01 · 数据准备</div><p>在交易日更新行情、指数与基础因子，并沉淀为统一研究面板。</p></div>
+          <div class="about-card"><div class="about-card-title">02 · 预测与构建</div><p>生成横截面排序信号，经过平滑、缓冲和仓位预算形成目标组合。</p></div>
+          <div class="about-card"><div class="about-card-title">03 · 验证与展示</div><p>在真实交易约束下评估策略，并将市场状态与组合结果更新至看板。</p></div>
         </div>
-        <div class="profile-item">
-          <div class="profile-label">Email</div>
-          <div class="profile-value">（待填写）</div>
-        </div>
-      </div>
+      </section>
+
+      <div class="about-note">本项目用于量化研究与教育交流，不构成任何投资建议。历史回测或模拟结果不代表未来表现，投资决策应结合自身风险承受能力独立判断。</div>
     </div>
   </div>
 

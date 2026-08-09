@@ -164,6 +164,18 @@
   .about-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.75; }
   .architecture { background: #202733; color: #e9eef6; border-radius: 9px; padding: 20px 22px; overflow-x: auto; font: 12px/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
   .about-note { margin-top: 24px; padding: 14px 16px; border-left: 3px solid var(--accent); background: rgba(74,127,193,0.06); color: var(--text-secondary); font-size: 13px; line-height: 1.8; }
+  .join-hero { text-align: center; padding: 18px 0 30px; }
+  .join-hero h2 { font-size: 30px; letter-spacing: -0.03em; margin: 8px 0; }
+  .join-hero p { color: var(--text-secondary); font-size: 15px; }
+  .join-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .join-panel { border: 1px solid var(--border); border-radius: 9px; padding: 20px; background: #fafbfc; }
+  .join-panel h3 { font-size: 15px; margin-bottom: 10px; }
+  .join-panel ul { list-style: none; display: grid; gap: 8px; }
+  .join-panel li { color: var(--text-secondary); font-size: 13px; line-height: 1.7; padding-left: 14px; position: relative; }
+  .join-panel li::before { content: '—'; position: absolute; left: 0; color: var(--accent); }
+  .join-cta { margin-top: 18px; padding: 20px; border-radius: 9px; background: #202733; color: #fff; text-align: center; }
+  .join-cta p { color: rgba(255,255,255,0.76); font-size: 13px; margin: 6px 0 13px; }
+  .join-email { display: inline-block; padding: 8px 14px; border-radius: 6px; background: #fff; color: #202733; font-size: 14px; font-weight: 600; text-decoration: none; }
 
   /* ── Footer ── */
   .global-footer {
@@ -241,6 +253,7 @@
     .chart-hint { display: none; }
     .about-profile { flex-direction: column; gap: 16px; }
     .about-grid { grid-template-columns: 1fr; }
+    .join-list { grid-template-columns: 1fr; }
     .about-hero h2 { font-size: 23px; }
     .info-section p { font-size: 13px; }
     .pf-cards { gap: 8px; }
@@ -265,7 +278,7 @@
       <div class="nav-tab" data-page="portfolio">实盘</div>
       <div class="nav-tab" data-page="info">数据说明</div>
       <div class="nav-tab" data-page="about">关于</div>
-      <div class="nav-tab" data-page="about">加入我们</div>
+      <div class="nav-tab" data-page="join">加入我们</div>
     </div>
   </div>
 </nav>
@@ -437,6 +450,63 @@
       </section>
 
       <div class="about-note">本项目用于量化研究与教育交流，不构成任何投资建议。历史回测或模拟结果不代表未来表现，投资决策应结合自身风险承受能力独立判断。</div>
+    </div>
+  </div>
+
+  <!-- Join Us -->
+  <div class="page" id="page-join">
+    <div class="card">
+      <section class="join-hero">
+        <div class="about-kicker">Join JuLong Quant</div>
+        <h2>A 股生存研究员</h2>
+        <p>量化研究、市场情绪与“今天为什么又这样”交叉学科。</p>
+      </section>
+
+      <div class="join-list">
+        <section class="join-panel">
+          <h3>你可能会做</h3>
+          <ul>
+            <li>研究昨天“永远涨”的票，今天为什么突然开始价值投资。</li>
+            <li>判断高开低走究竟是洗盘、出货，还是市场在提醒你少看盘。</li>
+            <li>把“感觉要起飞”翻译成可回测的因子。</li>
+            <li>每天提醒系统不要追高，再看它用数据告诉你什么叫克制。</li>
+          </ul>
+        </section>
+
+        <section class="join-panel">
+          <h3>我们希望你</h3>
+          <ul>
+            <li>会 Python；不会也可以，但别只会说“主力在吸筹”。</li>
+            <li>见过涨停和跌停，最好不要在同一天同时持有它们。</li>
+            <li>能区分“长期看好”和“暂时套住”。</li>
+            <li>相信数据，也尊重 A 股偶尔不讲道理的权利。</li>
+          </ul>
+        </section>
+
+        <section class="join-panel">
+          <h3>你将获得</h3>
+          <ul>
+            <li>从数据、因子、模型到实盘看板的一整套研究视角。</li>
+            <li>与回撤曲线和自我认知共同成长的机会。</li>
+            <li>牛市学习谦虚，熊市学习坚强，震荡市学习关闭软件。</li>
+          </ul>
+        </section>
+
+        <section class="join-panel">
+          <h3>温馨提示</h3>
+          <ul>
+            <li>本岗位不提供财富自由，只提供更高级的亏损归因能力。</li>
+            <li>我们不预测市场，只是尽量不被市场教育得太惨。</li>
+            <li>如果市场不是玄学而是一道题，那就一起继续解题。</li>
+          </ul>
+        </section>
+      </div>
+
+      <section class="join-cta">
+        <strong>觉得这份 JD 像你？</strong>
+        <p>欢迎发送简历、项目作品或一段你对 A 股的独到观察。</p>
+        <a class="join-email" href="mailto:howtoplay2024@yeah.net">howtoplay2024@yeah.net</a>
+      </section>
     </div>
   </div>
 

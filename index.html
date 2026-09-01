@@ -223,6 +223,18 @@
   .ai-message code { padding: 1px 4px; border-radius: 3px; background: #eff1f4; color: #2d3746; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
   .ai-message pre { overflow-x: auto; margin: 9px 0; padding: 9px; border-radius: 6px; background: #202631; color: #e8edf5; }
   .ai-message pre code { padding: 0; background: transparent; color: inherit; white-space: pre; }
+  .ai-table-scroll { width: 100%; overflow-x: auto; margin: 10px 0 13px; border: 1px solid #dce2ea; border-radius: 8px; background: #fff; box-shadow: 0 1px 0 rgba(21,28,38,.03); -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  .ai-table-scroll:focus-visible { outline: 2px solid rgba(74,127,193,.48); outline-offset: 2px; }
+  .ai-markdown-table { width: 100%; min-width: 460px; border-collapse: collapse; color: #354052; font-size: 11px; line-height: 1.55; font-variant-numeric: tabular-nums; }
+  .ai-markdown-table th, .ai-markdown-table td { padding: 9px 11px; border-right: 1px solid #e6eaf0; border-bottom: 1px solid #e6eaf0; vertical-align: top; white-space: normal; }
+  .ai-markdown-table th:last-child, .ai-markdown-table td:last-child { border-right: 0; }
+  .ai-markdown-table tbody tr:last-child td { border-bottom: 0; }
+  .ai-markdown-table th { position: sticky; top: 0; z-index: 1; background: #eef1f5; color: #202a38; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+  .ai-markdown-table tbody tr:nth-child(even) { background: #fafbfc; }
+  .ai-markdown-table tbody tr:hover { background: #f3f6f9; }
+  .ai-markdown-table .align-left { text-align: left; }
+  .ai-markdown-table .align-center { text-align: center; }
+  .ai-markdown-table .align-right { text-align: right; }
   .ai-compose { display: flex; align-items: end; gap: 9px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e4e7ec; }
   .ai-input { width: auto; min-width: 0; flex: 1 1 auto; min-height: 46px; max-height: 128px; resize: none; border: 1px solid #cfd6e0; border-radius: 9px; padding: 11px 12px; color: #202833; background: #fff; font: 13px/1.55 "PingFang SC", "Microsoft YaHei", sans-serif; outline: none; }
   .ai-input:focus { border-color: #171a20; box-shadow: 0 0 0 3px rgba(23,26,32,.08); }
@@ -1136,6 +1148,7 @@ document.querySelectorAll('#strategy-toggle span').forEach(function(el) {
 })();
 </script>
 
+<script src="markdown_renderer.js"></script>
 <script src="stock_research.js"></script>
 <script src="ai_research_task.js"></script>
 <script src="ai_conversation.js"></script>
@@ -1217,72 +1230,13 @@ async function aiPageContext(message) {
   };
 }
 
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
-}
-
-function renderInlineMarkdown(value) {
-  return escapeHtml(value)
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/__([^_]+)__/g, '<strong>$1</strong>')
-    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
-}
-
-function renderMarkdown(markdown) {
-  const lines = String(markdown || '').replace(/\r\n/g, '\n').split('\n');
-  const output = [];
-  let listType = null;
-  let codeLines = null;
-  const closeList = () => {
-    if (listType) output.push(`</${listType}>`);
-    listType = null;
-  };
-
-  for (const line of lines) {
-    if (/^```/.test(line)) {
-      closeList();
-      if (codeLines) { output.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`); codeLines = null; }
-      else codeLines = [];
-      continue;
-    }
-    if (codeLines) { codeLines.push(line); continue; }
-    const heading = line.match(/^(#{1,3})\s+(.+)$/);
-    const unordered = line.match(/^\s*[-*+]\s+(.+)$/);
-    const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
-    if (heading) {
-      closeList();
-      const level = heading[1].length;
-      output.push(`<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`);
-    } else if (unordered || ordered) {
-      const nextType = unordered ? 'ul' : 'ol';
-      if (listType !== nextType) { closeList(); output.push(`<${nextType}>`); listType = nextType; }
-      output.push(`<li>${renderInlineMarkdown((unordered || ordered)[1])}</li>`);
-    } else if (/^>\s?/.test(line)) {
-      closeList();
-      output.push(`<blockquote>${renderInlineMarkdown(line.replace(/^>\s?/, ''))}</blockquote>`);
-    } else if (/^\s*---+\s*$/.test(line)) {
-      closeList();
-      output.push('<hr>');
-    } else if (line.trim()) {
-      closeList();
-      output.push(`<p>${renderInlineMarkdown(line)}</p>`);
-    } else {
-      closeList();
-    }
-  }
-  if (codeLines) output.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
-  closeList();
-  return output.join('');
-}
-
 function appendAiMessage(role, text, state) {
   const item = document.createElement('div');
   item.className = `ai-message ${role}${state ? ` ${state}` : ''}`;
   item.dataset.state = state || '';
   item.innerHTML = role === 'assistant' && state !== 'error'
-    ? renderMarkdown(text)
-    : escapeHtml(text).replace(/\n/g, '<br>');
+    ? JuLongMarkdown.render(text)
+    : JuLongMarkdown.escapeHtml(text).replace(/\n/g, '<br>');
   aiMessages.appendChild(item);
   aiMessages.classList.add('visible');
   aiEmpty.classList.add('hidden');

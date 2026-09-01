@@ -1,8 +1,11 @@
 (function (root, factory) {
-  const api = factory();
+  const researchTask = typeof module === 'object' && module.exports
+    ? require('./ai_research_task.js')
+    : root && root.JuLongResearchTask;
+  const api = factory(researchTask);
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (root) root.JuLongConversation = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (ResearchTask) {
   'use strict';
 
   const STORAGE_KEY = 'julong-research-conversation-v1';
@@ -18,7 +21,11 @@
   }
 
   function defaultTask() {
-    return { subject: 'market', goal: 'research', time_range: 'today' };
+    const task = { subject: 'market', goal: 'research', time_range: 'today' };
+    if (ResearchTask) {
+      task.research_task = ResearchTask.resolveTask({ domain: 'market', action: 'overview', time_range: 'today' });
+    }
+    return task;
   }
 
   function createConversation(now, id) {
@@ -46,11 +53,22 @@
   function sanitizeTask(task) {
     const base = defaultTask();
     if (!task || typeof task !== 'object') return base;
-    return {
+    const sanitized = {
       subject: String(task.subject || base.subject).slice(0, 40),
       goal: String(task.goal || base.goal).slice(0, 80),
       time_range: String(task.time_range || base.time_range).slice(0, 40),
     };
+    if (ResearchTask) {
+      const candidate = task.research_task && typeof task.research_task === 'object'
+        ? task.research_task
+        : {
+          domain: sanitized.subject,
+          action: sanitized.goal === 'research' ? 'overview' : 'analyze',
+          time_range: sanitized.time_range,
+        };
+      sanitized.research_task = ResearchTask.resolveTask(candidate, base.research_task);
+    }
+    return sanitized;
   }
 
   function normalizeConversation(value, now) {
@@ -92,7 +110,19 @@
       { role: 'assistant', content: assistantContent },
     ]));
     if (taskUpdate && typeof taskUpdate === 'object') {
-      next.task = sanitizeTask(Object.assign({}, next.task, taskUpdate));
+      const mergedTask = Object.assign({}, next.task, taskUpdate);
+      if (taskUpdate.research_task && next.task.research_task) {
+        const researchUpdate = Object.assign({}, taskUpdate.research_task);
+        if (!Object.prototype.hasOwnProperty.call(researchUpdate, 'time_range') && taskUpdate.time_range) {
+          researchUpdate.time_range = {
+            value: taskUpdate.time_range,
+            source: 'inferred',
+            confidence: 1,
+          };
+        }
+        mergedTask.research_task = Object.assign({}, next.task.research_task, researchUpdate);
+      }
+      next.task = sanitizeTask(mergedTask);
     }
     next.expires_at = new Date(timestamp + TTL_MS).toISOString();
     return next;

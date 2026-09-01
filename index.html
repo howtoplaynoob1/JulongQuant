@@ -1110,7 +1110,7 @@ document.querySelectorAll('#strategy-toggle span').forEach(function(el) {
     </div>
   </div>
   <div class="ai-body">
-    <p class="ai-intro">读取当前页面的市场与策略摘要，为你提供可追溯的量化解读。</p>
+    <p class="ai-intro">读取市场、策略与个股研究快照，为你提供可追溯的量化解读。</p>
     <div class="ai-prompts" id="ai-prompts">
       <button class="ai-prompt" type="button">解读今日市场状态</button>
       <button class="ai-prompt" type="button">今日策略应关注什么？</button>
@@ -1118,13 +1118,14 @@ document.querySelectorAll('#strategy-toggle span').forEach(function(el) {
     </div>
     <div class="ai-messages" id="ai-messages" aria-live="polite"></div>
     <div class="ai-compose">
-      <textarea class="ai-input" id="ai-input" rows="1" maxlength="1500" placeholder="向巨龙智策提问…"></textarea>
+      <textarea class="ai-input" id="ai-input" rows="1" maxlength="1500" placeholder="输入股票名称、代码或研究问题…"></textarea>
       <button class="ai-send" id="ai-send" type="button" aria-label="发送问题">↑</button>
     </div>
     <p class="ai-disclaimer">仅供量化研究展示，不构成投资建议。</p>
   </div>
 </aside>
 
+<script src="stock_research.js"></script>
 <script src="ai_research_task.js"></script>
 <script src="ai_conversation.js"></script>
 <script>
@@ -1137,8 +1138,57 @@ const aiMessages = document.getElementById('ai-messages');
 const aiNew = document.getElementById('ai-new');
 let aiConversation = JuLongConversation.restore(sessionStorage);
 
-function aiPageContext() {
+function activeStockCode() {
+  const task = aiConversation && aiConversation.task && aiConversation.task.research_task;
+  const entity = task && Array.isArray(task.entities) ? task.entities[0] : null;
+  return entity && entity.value ? entity.value : null;
+}
+
+function stockDimensions(message) {
+  const value = String(message || '');
+  const dimensions = [];
+  if (/估值|市盈率|市净率|PE|PB/i.test(value)) dimensions.push('valuation');
+  if (/风险|波动|回撤/.test(value)) dimensions.push('risk', 'volatility');
+  if (/成交|换手|流动性/.test(value)) dimensions.push('liquidity');
+  if (/走势|涨跌|收益|表现/.test(value)) dimensions.push('trend', 'return');
+  return dimensions.length ? Array.from(new Set(dimensions)) : ['trend', 'return', 'volatility', 'valuation', 'liquidity'];
+}
+
+function activateStockResearch(match, message) {
+  const stock = match.stock;
+  const researchTask = JuLongResearchTask.resolveTask({
+    domain: { value: 'stock', source: match.source, confidence: 1 },
+    action: { value: 'analyze', source: 'inferred', confidence: 0.9 },
+    entities: [{
+      value: stock.ts_code || stock.code,
+      name: stock.name,
+      source: match.source,
+      confidence: 1,
+    }],
+    dimensions: stockDimensions(message),
+    time_range: { value: '60d', source: 'defaulted', confidence: 1 },
+    frequency: { value: 'daily', source: 'defaulted', confidence: 1 },
+    original_message: message,
+  }, aiConversation.task && aiConversation.task.research_task);
+  aiConversation.task = {
+    subject: 'stock',
+    goal: 'stock_research',
+    time_range: '60d',
+    research_task: researchTask,
+  };
+  aiConversation = JuLongConversation.persist(sessionStorage, aiConversation);
+}
+
+async function aiPageContext(message) {
   const portfolio = window.PORTFOLIO_DATA && window.PORTFOLIO_DATA.latest;
+  let stockMatch = null;
+  let stockDataWarning = null;
+  try {
+    stockMatch = await JuLongStockResearch.resolve(message, activeStockCode());
+    if (stockMatch) activateStockResearch(stockMatch, message);
+  } catch (error) {
+    stockDataWarning = error && error.message ? error.message : '个股研究数据暂时不可用';
+  }
   return {
     market: typeof latest !== 'undefined' && latest ? {
       date: latest.date, regime: latest.regime, regime_cn: latest.regime_cn,
@@ -1151,6 +1201,8 @@ function aiPageContext() {
       daily_return_pct: portfolio.daily_return_pct, invested_pct: portfolio.invested_pct,
       n_positions: portfolio.n_positions,
     } : null,
+    stock: stockMatch ? stockMatch.stock : null,
+    stock_data_warning: stockDataWarning,
   };
 }
 
@@ -1235,12 +1287,13 @@ function renderAiConversation() {
 async function askJuLong(question) {
   const message = (question || '').trim();
   if (!message) return;
-  const request = JuLongConversation.buildRequest(aiConversation, message, aiPageContext());
   aiInput.value = '';
   aiSend.disabled = true;
   appendAiMessage('user', message);
   const pending = appendAiMessage('assistant', '正在读取当前研究上下文…', 'pending');
   try {
+    const context = await aiPageContext(message);
+    const request = JuLongConversation.buildRequest(aiConversation, message, context);
     const response = await fetch(AI_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

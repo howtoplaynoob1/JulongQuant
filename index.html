@@ -177,6 +177,42 @@
   .join-cta p { color: rgba(255,255,255,0.76); font-size: 13px; margin: 6px 0 13px; }
   .join-email { display: inline-block; padding: 8px 14px; border-radius: 6px; background: #fff; color: #202733; font-size: 14px; font-weight: 600; text-decoration: none; }
 
+  /* ─── JuLong Intelligence ─── */
+  .ai-orb {
+    position: fixed; right: 28px; bottom: 28px; z-index: 120;
+    display: inline-flex; align-items: center; gap: 10px;
+    border: 1px solid #1b1f27; border-radius: 999px; padding: 11px 16px 11px 12px;
+    background: #171a20; color: #fff; box-shadow: 0 12px 30px rgba(17, 22, 31, 0.24);
+    font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    letter-spacing: .02em; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .ai-orb:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(17, 22, 31, 0.3); }
+  .ai-orb-mark { width: 22px; height: 22px; border: 1px solid rgba(255,255,255,.42); border-radius: 50%; display: grid; place-items: center; font-size: 12px; }
+  .ai-panel {
+    position: fixed; right: 28px; bottom: 84px; z-index: 121; width: min(390px, calc(100vw - 32px));
+    overflow: hidden; border: 1px solid #dce0e7; border-radius: 15px; background: #fff;
+    box-shadow: 0 22px 70px rgba(17, 22, 31, .22); transform: translateY(12px) scale(.98);
+    opacity: 0; pointer-events: none; transform-origin: bottom right; transition: opacity .2s ease, transform .2s ease;
+  }
+  .ai-panel.open { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+  .ai-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 17px 14px; background: #171a20; color: #fff; }
+  .ai-head-title { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 650; }
+  .ai-head-note { margin-top: 3px; color: rgba(255,255,255,.6); font-size: 11px; font-weight: 400; }
+  .ai-close { border: 0; background: transparent; color: rgba(255,255,255,.76); cursor: pointer; font-size: 21px; line-height: 1; padding: 2px 4px; }
+  .ai-body { padding: 16px; background: linear-gradient(160deg, #f8f9fb, #fff 54%); }
+  .ai-intro { color: #505966; font-size: 13px; line-height: 1.7; margin-bottom: 12px; }
+  .ai-prompts { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+  .ai-prompt { border: 1px solid #dbe1e9; border-radius: 6px; padding: 6px 8px; color: #394250; background: #fff; font-size: 12px; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+  .ai-prompt:hover { border-color: #171a20; color: #171a20; background: #f4f5f7; }
+  .ai-answer { display: none; max-height: 260px; overflow-y: auto; border: 1px solid #e1e5eb; border-radius: 9px; background: #fff; padding: 12px; color: #313945; white-space: pre-wrap; font-size: 13px; line-height: 1.75; }
+  .ai-answer.visible { display: block; }
+  .ai-compose { display: flex; align-items: end; gap: 8px; margin-top: 12px; }
+  .ai-input { width: 100%; min-height: 38px; max-height: 82px; resize: none; border: 1px solid #d5dbe4; border-radius: 8px; padding: 9px 10px; color: #252b35; background: #fff; font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; outline: none; }
+  .ai-input:focus { border-color: #171a20; box-shadow: 0 0 0 3px rgba(23,26,32,.08); }
+  .ai-send { width: 38px; height: 38px; flex: 0 0 38px; border: 0; border-radius: 8px; background: #171a20; color: #fff; font-size: 16px; cursor: pointer; }
+  .ai-send:disabled { cursor: not-allowed; opacity: .5; }
+  .ai-disclaimer { margin-top: 10px; color: #8a93a0; font-size: 10px; line-height: 1.55; }
+
   /* ── Footer ── */
   .global-footer {
     text-align: center; font-size: 13px; color: var(--text-secondary);
@@ -260,6 +296,8 @@
     .pf-card { min-width: 100px; padding: 10px 6px; }
     .pf-card-value { font-size: 18px; }
     .holdings-grid { flex-direction: column; gap: 16px; }
+    .ai-orb { right: 16px; bottom: 16px; }
+    .ai-panel { right: 16px; bottom: 72px; }
   }
   @media (max-width: 380px) {
     .nav-tab { padding: 4px 6px; font-size: 11px; }
@@ -1036,5 +1074,95 @@ document.querySelectorAll('#strategy-toggle span').forEach(function(el) {
 })();
 </script>
 
+<button class="ai-orb" id="ai-orb" type="button" aria-label="打开巨龙智策">
+  <span class="ai-orb-mark">✦</span>
+  巨龙智策
+</button>
+
+<aside class="ai-panel" id="ai-panel" aria-label="巨龙智策">
+  <div class="ai-head">
+    <div class="ai-head-title">
+      <span class="ai-orb-mark">✦</span>
+      <div>巨龙智策<div class="ai-head-note">Quant research copilot</div></div>
+    </div>
+    <button class="ai-close" id="ai-close" type="button" aria-label="关闭">×</button>
+  </div>
+  <div class="ai-body">
+    <p class="ai-intro">读取当前页面的市场与策略摘要，为你提供可追溯的量化解读。</p>
+    <div class="ai-prompts" id="ai-prompts">
+      <button class="ai-prompt" type="button">解读今日市场状态</button>
+      <button class="ai-prompt" type="button">今日策略应关注什么？</button>
+      <button class="ai-prompt" type="button">本周策略表现如何理解？</button>
+    </div>
+    <div class="ai-answer" id="ai-answer" aria-live="polite"></div>
+    <div class="ai-compose">
+      <textarea class="ai-input" id="ai-input" rows="1" maxlength="1500" placeholder="向巨龙智策提问…"></textarea>
+      <button class="ai-send" id="ai-send" type="button" aria-label="发送问题">↑</button>
+    </div>
+    <p class="ai-disclaimer">仅供量化研究展示，不构成投资建议。</p>
+  </div>
+</aside>
+
+<script>
+const AI_ENDPOINT = 'https://julong-ai.howtoplay2024.workers.dev/chat';
+const aiOrb = document.getElementById('ai-orb');
+const aiPanel = document.getElementById('ai-panel');
+const aiInput = document.getElementById('ai-input');
+const aiSend = document.getElementById('ai-send');
+const aiAnswer = document.getElementById('ai-answer');
+
+function aiPageContext() {
+  const portfolio = window.PORTFOLIO_DATA && window.PORTFOLIO_DATA.latest;
+  return {
+    market: typeof latest !== 'undefined' && latest ? {
+      date: latest.date, regime: latest.regime, regime_cn: latest.regime_cn,
+      advice: latest.advice, regime_score: latest.regime_score,
+      trend_score: latest.trend_score, breadth_score: latest.breadth_score,
+      vol_percentile: latest.vol_percentile, state_age: latest.state_age,
+    } : null,
+    strategy: portfolio ? {
+      date: portfolio.date, nav: portfolio.nav, cumulative_return_pct: portfolio.cum_return_pct,
+      daily_return_pct: portfolio.daily_return_pct, invested_pct: portfolio.invested_pct,
+      n_positions: portfolio.n_positions,
+    } : null,
+  };
+}
+
+function setAiAnswer(text, isError) {
+  aiAnswer.textContent = text;
+  aiAnswer.classList.add('visible');
+  aiAnswer.style.color = isError ? '#ad4a40' : '#313945';
+}
+
+async function askJuLong(question) {
+  const message = (question || '').trim();
+  if (!message) return;
+  aiInput.value = message;
+  aiSend.disabled = true;
+  setAiAnswer('巨龙智策正在读取当前研究上下文…');
+  try {
+    const response = await fetch(AI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, context: aiPageContext() }),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.reply) throw new Error(result.error || '请求未完成');
+    setAiAnswer(result.reply);
+  } catch (error) {
+    setAiAnswer('暂时无法连接巨龙智策，请稍后重试。', true);
+  } finally {
+    aiSend.disabled = false;
+  }
+}
+
+aiOrb.addEventListener('click', () => { aiPanel.classList.toggle('open'); if (aiPanel.classList.contains('open')) aiInput.focus(); });
+document.getElementById('ai-close').addEventListener('click', () => aiPanel.classList.remove('open'));
+aiSend.addEventListener('click', () => askJuLong(aiInput.value));
+aiInput.addEventListener('keydown', event => {
+  if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); askJuLong(aiInput.value); }
+});
+document.querySelectorAll('.ai-prompt').forEach(button => button.addEventListener('click', () => askJuLong(button.textContent)));
+</script>
 </body>
 </html>

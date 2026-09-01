@@ -26,6 +26,7 @@
     color: var(--text);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
 
   /* ── Nav ── */
@@ -45,7 +46,7 @@
   }
   .nav-logo span { color: var(--accent); }
   .brand-icon { width: 30px; height: 30px; object-fit: contain; display: block; }
-  .nav-tabs { display: flex; gap: 4px; }
+  .nav-tabs { display: flex; gap: 4px; min-width: 0; }
   .nav-tab {
     padding: 8px 16px; border-radius: 6px; cursor: pointer;
     font-size: 14px; color: var(--text-secondary);
@@ -177,43 +178,40 @@
   .join-cta p { color: rgba(255,255,255,0.76); font-size: 13px; margin: 6px 0 13px; }
   .join-email { display: inline-block; padding: 8px 14px; border-radius: 6px; background: #fff; color: #202733; font-size: 14px; font-weight: 600; text-decoration: none; }
 
-  /* ─── JuLong Intelligence ─── */
-  .ai-orb {
-    position: fixed; right: 28px; bottom: 28px; z-index: 120;
-    display: inline-flex; align-items: center; gap: 10px;
-    border: 1px solid #1b1f27; border-radius: 999px; padding: 11px 16px 11px 12px;
-    background: #171a20; color: #fff; box-shadow: 0 12px 30px rgba(17, 22, 31, 0.24);
-    font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    letter-spacing: .02em; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease;
-  }
-  .ai-orb:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(17, 22, 31, 0.3); }
-  .ai-orb-mark { width: 24px; height: 24px; display: block; object-fit: contain; filter: invert(1); }
-  .ai-panel {
-    position: fixed; right: 28px; bottom: 84px; z-index: 121; width: min(390px, calc(100vw - 32px));
-    overflow: hidden; border: 1px solid #dce0e7; border-radius: 15px; background: #fff;
-    box-shadow: 0 22px 70px rgba(17, 22, 31, .22); transform: translateY(12px) scale(.98);
-    opacity: 0; pointer-events: none; transform-origin: bottom right; transition: opacity .2s ease, transform .2s ease;
-  }
-  .ai-panel.open { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
-  .ai-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 17px 14px; background: #171a20; color: #fff; }
-  .ai-head-actions { display: flex; align-items: center; gap: 7px; }
-  .ai-new { border: 1px solid rgba(255,255,255,.22); border-radius: 6px; padding: 5px 8px; background: transparent; color: rgba(255,255,255,.78); cursor: pointer; font-size: 11px; }
-  .ai-new:hover { border-color: rgba(255,255,255,.48); color: #fff; }
-  .ai-head-title { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 650; }
-  .ai-head-note { margin-top: 3px; color: rgba(255,255,255,.6); font-size: 11px; font-weight: 400; }
-  .ai-close { border: 0; background: transparent; color: rgba(255,255,255,.76); cursor: pointer; font-size: 21px; line-height: 1; padding: 2px 4px; }
-  .ai-body { padding: 16px; background: linear-gradient(160deg, #f8f9fb, #fff 54%); }
-  .ai-intro { color: #505966; font-size: 13px; line-height: 1.7; margin-bottom: 12px; }
-  .ai-prompts { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
-  .ai-prompt { border: 1px solid #dbe1e9; border-radius: 6px; padding: 6px 8px; color: #394250; background: #fff; font-size: 12px; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
-  .ai-prompt:hover { border-color: #171a20; color: #171a20; background: #f4f5f7; }
-  .ai-messages { display: none; max-height: 300px; overflow-y: auto; padding: 3px 2px 5px; font-size: 13px; line-height: 1.7; scroll-behavior: smooth; }
-  .ai-messages.visible { display: flex; flex-direction: column; gap: 10px; }
-  .ai-message { max-width: 91%; border-radius: 10px; padding: 9px 11px; overflow-wrap: anywhere; }
-  .ai-message.user { align-self: flex-end; background: #20252d; color: #fff; border-bottom-right-radius: 3px; }
-  .ai-message.assistant { align-self: flex-start; border: 1px solid #e1e5eb; background: #fff; color: #313945; border-bottom-left-radius: 3px; }
+  /* ─── JuLong Intelligence Workbench ─── */
+  .dashboard-intelligence-grid { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: 20px; align-items: stretch; margin-bottom: 20px; }
+  .dashboard-intelligence-grid .status-card { margin: 0; padding: 30px 22px; }
+  .dashboard-intelligence-grid .score-cards { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .dashboard-intelligence-grid .score-card { padding: 12px 9px; }
+  .dashboard-intelligence-grid .score-card-value { font-size: 22px; margin-bottom: 8px; }
+  .dashboard-intelligence-grid .score-trend { font-size: 11px; }
+  .ai-panel { min-width: 0; min-height: 580px; overflow: hidden; border: 1px solid #1d2633; border-radius: 12px; background: #f7f8fa; box-shadow: 0 12px 36px rgba(26,36,50,.13); display: flex; flex-direction: column; }
+  .ai-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px; background: #151c26; color: #fff; }
+  .ai-head-actions { display: flex; align-items: center; gap: 9px; }
+  .ai-new { border: 1px solid rgba(255,255,255,.22); border-radius: 7px; padding: 7px 10px; background: transparent; color: rgba(255,255,255,.8); cursor: pointer; font-size: 11px; transition: .18s ease; }
+  .ai-new:hover { border-color: rgba(255,255,255,.58); color: #fff; transform: translateY(-1px); }
+  .ai-head-title { display: flex; align-items: center; gap: 12px; font-size: 17px; font-family: "Songti SC", STSong, Georgia, serif; font-weight: 700; letter-spacing: .03em; }
+  .ai-brand-mark { width: 32px; height: 32px; display: block; object-fit: contain; filter: invert(1); }
+  .ai-head-note { margin-top: 2px; color: rgba(255,255,255,.58); font: 10px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; }
+  .ai-session-state { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,.62); font-size: 10px; }
+  .ai-session-state::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #68b77a; box-shadow: 0 0 0 4px rgba(104,183,122,.12); }
+  .ai-body { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 16px 17px 14px; background: linear-gradient(145deg, #f2f4f7, #fff 48%); }
+  .ai-intro { color: #566171; font-size: 12px; line-height: 1.7; margin-bottom: 10px; }
+  .ai-prompts { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+  .ai-prompt { border: 1px solid #d6dce5; border-radius: 999px; padding: 6px 10px; color: #344051; background: rgba(255,255,255,.88); font-size: 11px; cursor: pointer; transition: border-color .15s, color .15s, background .15s, transform .15s; }
+  .ai-prompt:hover { border-color: #1a2431; color: #111820; background: #fff; transform: translateY(-1px); }
+  .ai-empty { flex: 1; min-height: 260px; border: 1px dashed #d6dce5; border-radius: 10px; display: grid; place-items: center; padding: 28px; text-align: center; color: #778292; background: rgba(255,255,255,.46); }
+  .ai-empty.hidden { display: none; }
+  .ai-empty strong { display: block; color: #263141; font: 700 20px/1.3 "Songti SC", STSong, Georgia, serif; margin-bottom: 7px; }
+  .ai-empty span { display: block; max-width: 340px; font-size: 12px; line-height: 1.8; }
+  .ai-messages { display: none; flex: 1; min-height: 300px; max-height: 480px; overflow-y: auto; padding: 2px 5px 8px 1px; font-size: 13px; line-height: 1.75; scroll-behavior: smooth; scrollbar-width: thin; }
+  .ai-messages.visible { display: flex; flex-direction: column; gap: 12px; }
+  .ai-message { max-width: 94%; border-radius: 10px; padding: 10px 12px; overflow-wrap: anywhere; }
+  .ai-message.user { align-self: flex-end; background: #1d2632; color: #fff; border-bottom-right-radius: 3px; box-shadow: 0 5px 14px rgba(23,31,42,.12); }
+  .ai-message.assistant { align-self: flex-start; border: 1px solid #dfe4eb; background: #fff; color: #313945; border-bottom-left-radius: 3px; }
   .ai-message.error { border-color: #edd3d0; background: #fff8f7; color: #ad4a40; }
   .ai-message.pending { color: #737d8a; }
+  .ai-message.notice { border-color: #d9dfc9; background: #fbfcf6; color: #667044; font-size: 11px; }
   .ai-message h1, .ai-message h2, .ai-message h3 { color: #202631; line-height: 1.35; margin: 13px 0 7px; }
   .ai-message h1 { font-size: 17px; } .ai-message h2 { font-size: 15px; } .ai-message h3 { font-size: 14px; }
   .ai-message h1:first-child, .ai-message h2:first-child, .ai-message h3:first-child { margin-top: 0; }
@@ -225,12 +223,12 @@
   .ai-message code { padding: 1px 4px; border-radius: 3px; background: #eff1f4; color: #2d3746; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
   .ai-message pre { overflow-x: auto; margin: 9px 0; padding: 9px; border-radius: 6px; background: #202631; color: #e8edf5; }
   .ai-message pre code { padding: 0; background: transparent; color: inherit; white-space: pre; }
-  .ai-compose { display: flex; align-items: end; gap: 8px; margin-top: 12px; }
-  .ai-input { width: 100%; min-height: 38px; max-height: 82px; resize: none; border: 1px solid #d5dbe4; border-radius: 8px; padding: 9px 10px; color: #252b35; background: #fff; font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; outline: none; }
+  .ai-compose { display: flex; align-items: end; gap: 9px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e4e7ec; }
+  .ai-input { width: auto; min-width: 0; flex: 1 1 auto; min-height: 46px; max-height: 128px; resize: none; border: 1px solid #cfd6e0; border-radius: 9px; padding: 11px 12px; color: #202833; background: #fff; font: 13px/1.55 "PingFang SC", "Microsoft YaHei", sans-serif; outline: none; }
   .ai-input:focus { border-color: #171a20; box-shadow: 0 0 0 3px rgba(23,26,32,.08); }
-  .ai-send { width: 38px; height: 38px; flex: 0 0 38px; border: 0; border-radius: 8px; background: #171a20; color: #fff; font-size: 16px; cursor: pointer; }
+  .ai-send { height: 46px; flex: 0 0 auto; border: 0; border-radius: 9px; padding: 0 15px; background: #171f2a; color: #fff; font-size: 12px; font-weight: 650; cursor: pointer; }
   .ai-send:disabled { cursor: not-allowed; opacity: .5; }
-  .ai-disclaimer { margin-top: 10px; color: #8a93a0; font-size: 10px; line-height: 1.55; }
+  .ai-compose-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: #8a93a0; font-size: 9px; line-height: 1.55; }
 
   /* ── Footer ── */
   .global-footer {
@@ -293,7 +291,11 @@
   @media (max-width: 768px) {
     .container { padding: 12px; }
     .nav-inner { padding: 0 12px; height: 50px; }
-    .nav-logo { font-size: 14px; margin-right: 12px; }
+    .nav-logo { margin-right: 8px; flex: 0 0 auto; }
+    .nav-logo span { display: none; }
+    .nav-tabs { flex: 1 1 auto; overflow-x: auto; scrollbar-width: none; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab { flex: 0 0 auto; }
     .nav-tab { padding: 5px 8px; font-size: 12px; }
     .card { padding: 16px; }
     .status-card { padding: 24px 16px; }
@@ -315,8 +317,18 @@
     .pf-card { min-width: 100px; padding: 10px 6px; }
     .pf-card-value { font-size: 18px; }
     .holdings-grid { flex-direction: column; gap: 16px; }
-    .ai-orb { right: 16px; bottom: 16px; }
-    .ai-panel { right: 16px; bottom: 72px; }
+    .dashboard-intelligence-grid { grid-template-columns: minmax(0, 1fr); }
+    .dashboard-intelligence-grid .status-card { min-width: 0; }
+    .ai-panel { order: -1; min-height: 560px; }
+    .ai-messages { max-height: 520px; }
+    .ai-head { padding: 16px; gap: 10px; }
+    .ai-head-actions { flex: 0 0 auto; }
+    .ai-session-state { display: none; }
+    .ai-body { padding: 14px; }
+    .ai-prompts { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 3px; scrollbar-width: none; }
+    .ai-prompts::-webkit-scrollbar { display: none; }
+    .ai-prompt { flex: 0 0 auto; }
+    .ai-compose-meta span:last-child { display: none; }
   }
   @media (max-width: 380px) {
     .nav-tab { padding: 4px 6px; font-size: 11px; }
@@ -344,7 +356,38 @@
 
   <!-- Dashboard -->
   <div class="page active" id="page-dashboard">
-    <div class="card status-card" id="status-card"></div>
+    <div class="dashboard-intelligence-grid">
+      <div class="card status-card" id="status-card"></div>
+      <section class="ai-panel" id="ai-workbench" aria-label="巨龙智策投研工作台">
+        <div class="ai-head">
+          <div class="ai-head-title">
+            <img class="ai-brand-mark" src="icon.png" alt="">
+            <div>巨龙智策<div class="ai-head-note">Quant Research Copilot</div></div>
+          </div>
+          <div class="ai-head-actions">
+            <span class="ai-session-state">上下文已连接</span>
+            <button class="ai-new" id="ai-new" type="button">新建研究</button>
+          </div>
+        </div>
+        <div class="ai-body">
+          <p class="ai-intro">围绕当前市场、策略与个股快照连续研究；刷新页面后仍保留本次会话。</p>
+          <div class="ai-prompts" id="ai-prompts">
+            <button class="ai-prompt" type="button">解读今日市场状态</button>
+            <button class="ai-prompt" type="button">研究一下贵州茅台</button>
+            <button class="ai-prompt" type="button">本周策略表现如何理解？</button>
+          </div>
+          <div class="ai-empty" id="ai-empty">
+            <div><strong>从一个研究问题开始</strong><span>可以直接输入股票名称、六位代码或市场问题，后续使用“它”“继续”“和刚才相比”等自然语言追问。</span></div>
+          </div>
+          <div class="ai-messages" id="ai-messages" aria-live="polite"></div>
+          <div class="ai-compose">
+            <textarea class="ai-input" id="ai-input" rows="2" maxlength="4000" placeholder="输入股票名称、代码或研究问题；Shift + Enter 换行…"></textarea>
+            <button class="ai-send" id="ai-send" type="button" aria-label="发送问题">发送 ↑</button>
+          </div>
+          <div class="ai-compose-meta"><span>会话保留 24 小时 · 最多 20 条上下文</span><span>仅供量化研究展示，不构成投资建议</span></div>
+        </div>
+      </section>
+    </div>
     <div class="card">
       <div class="chart-header">
         <h3>市场净值走势</h3>
@@ -1093,50 +1136,17 @@ document.querySelectorAll('#strategy-toggle span').forEach(function(el) {
 })();
 </script>
 
-<button class="ai-orb" id="ai-orb" type="button" aria-label="打开巨龙智策">
-  <img class="ai-orb-mark" src="icon.png" alt="">
-  巨龙智策
-</button>
-
-<aside class="ai-panel" id="ai-panel" aria-label="巨龙智策">
-  <div class="ai-head">
-    <div class="ai-head-title">
-      <img class="ai-orb-mark" src="icon.png" alt="">
-      <div>巨龙智策<div class="ai-head-note">Quant research copilot</div></div>
-    </div>
-    <div class="ai-head-actions">
-      <button class="ai-new" id="ai-new" type="button">新建研究</button>
-      <button class="ai-close" id="ai-close" type="button" aria-label="关闭">×</button>
-    </div>
-  </div>
-  <div class="ai-body">
-    <p class="ai-intro">读取市场、策略与个股研究快照，为你提供可追溯的量化解读。</p>
-    <div class="ai-prompts" id="ai-prompts">
-      <button class="ai-prompt" type="button">解读今日市场状态</button>
-      <button class="ai-prompt" type="button">今日策略应关注什么？</button>
-      <button class="ai-prompt" type="button">本周策略表现如何理解？</button>
-    </div>
-    <div class="ai-messages" id="ai-messages" aria-live="polite"></div>
-    <div class="ai-compose">
-      <textarea class="ai-input" id="ai-input" rows="1" maxlength="1500" placeholder="输入股票名称、代码或研究问题…"></textarea>
-      <button class="ai-send" id="ai-send" type="button" aria-label="发送问题">↑</button>
-    </div>
-    <p class="ai-disclaimer">仅供量化研究展示，不构成投资建议。</p>
-  </div>
-</aside>
-
 <script src="stock_research.js"></script>
 <script src="ai_research_task.js"></script>
 <script src="ai_conversation.js"></script>
 <script>
 const AI_ENDPOINT = 'https://julong-ai.howtoplay2024.workers.dev/chat';
-const aiOrb = document.getElementById('ai-orb');
-const aiPanel = document.getElementById('ai-panel');
 const aiInput = document.getElementById('ai-input');
 const aiSend = document.getElementById('ai-send');
 const aiMessages = document.getElementById('ai-messages');
+const aiEmpty = document.getElementById('ai-empty');
 const aiNew = document.getElementById('ai-new');
-let aiConversation = JuLongConversation.restore(sessionStorage);
+let aiConversation = JuLongConversation.restore(localStorage);
 
 function activeStockCode() {
   const task = aiConversation && aiConversation.task && aiConversation.task.research_task;
@@ -1176,7 +1186,7 @@ function activateStockResearch(match, message) {
     time_range: '60d',
     research_task: researchTask,
   };
-  aiConversation = JuLongConversation.persist(sessionStorage, aiConversation);
+  aiConversation = JuLongConversation.persist(localStorage, aiConversation);
 }
 
 async function aiPageContext(message) {
@@ -1203,6 +1213,7 @@ async function aiPageContext(message) {
     } : null,
     stock: stockMatch ? stockMatch.stock : null,
     stock_data_warning: stockDataWarning,
+    conversation: JuLongConversation.contextWindow(aiConversation),
   };
 }
 
@@ -1274,6 +1285,7 @@ function appendAiMessage(role, text, state) {
     : escapeHtml(text).replace(/\n/g, '<br>');
   aiMessages.appendChild(item);
   aiMessages.classList.add('visible');
+  aiEmpty.classList.add('hidden');
   aiMessages.scrollTop = aiMessages.scrollHeight;
   return item;
 }
@@ -1282,6 +1294,7 @@ function renderAiConversation() {
   aiMessages.innerHTML = '';
   aiConversation.history.forEach(message => appendAiMessage(message.role, message.content));
   aiMessages.classList.toggle('visible', aiConversation.history.length > 0);
+  aiEmpty.classList.toggle('hidden', aiConversation.history.length > 0);
 }
 
 async function askJuLong(question) {
@@ -1301,11 +1314,14 @@ async function askJuLong(question) {
     });
     const result = await response.json();
     const reply = result.answer_markdown || result.reply;
+    const finishReason = result.finish_reason || 'stop';
+    const truncated = result.truncated === true || finishReason === 'length';
     if (!response.ok || !reply) throw new Error(result.error || '请求未完成');
     pending.remove();
     appendAiMessage('assistant', reply);
     aiConversation = JuLongConversation.appendExchange(aiConversation, message, reply, result.task_update);
-    aiConversation = JuLongConversation.persist(sessionStorage, aiConversation);
+    aiConversation = JuLongConversation.persist(localStorage, aiConversation);
+    if (truncated) appendAiMessage('assistant', '回答仍达到长度上限。你可以输入“继续”，我会从中断处接着完成。', 'notice');
   } catch (error) {
     pending.remove();
     appendAiMessage('assistant', error.message || '暂时无法连接巨龙智策，请稍后重试。', 'error');
@@ -1315,10 +1331,8 @@ async function askJuLong(question) {
   }
 }
 
-aiOrb.addEventListener('click', () => { aiPanel.classList.toggle('open'); if (aiPanel.classList.contains('open')) aiInput.focus(); });
-document.getElementById('ai-close').addEventListener('click', () => aiPanel.classList.remove('open'));
 aiNew.addEventListener('click', () => {
-  aiConversation = JuLongConversation.reset(sessionStorage);
+  aiConversation = JuLongConversation.reset(localStorage);
   renderAiConversation();
   aiInput.value = '';
   aiInput.focus();
@@ -1326,6 +1340,10 @@ aiNew.addEventListener('click', () => {
 aiSend.addEventListener('click', () => askJuLong(aiInput.value));
 aiInput.addEventListener('keydown', event => {
   if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); askJuLong(aiInput.value); }
+});
+aiInput.addEventListener('input', () => {
+  aiInput.style.height = 'auto';
+  aiInput.style.height = `${Math.min(aiInput.scrollHeight, 128)}px`;
 });
 document.querySelectorAll('.ai-prompt').forEach(button => button.addEventListener('click', () => askJuLong(button.textContent)));
 renderAiConversation();

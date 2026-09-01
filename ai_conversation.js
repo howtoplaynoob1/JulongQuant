@@ -8,10 +8,12 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (ResearchTask) {
   'use strict';
 
-  const STORAGE_KEY = 'julong-research-conversation-v1';
-  const TTL_MS = 30 * 60 * 1000;
-  const MAX_MESSAGES = 8;
-  const MAX_CONTENT_LENGTH = 1500;
+  const STORAGE_KEY = 'julong-research-conversation-v2';
+  const TTL_MS = 24 * 60 * 60 * 1000;
+  const MAX_MESSAGES = 20;
+  const MAX_USER_CONTENT_LENGTH = 4000;
+  const MAX_ASSISTANT_CONTENT_LENGTH = 12000;
+  const MAX_HISTORY_CHARACTERS = 40000;
 
   function createId() {
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -40,14 +42,27 @@
 
   function sanitizeHistory(history) {
     if (!Array.isArray(history)) return [];
-    return history
+    const safe = history
       .filter(item => item && (item.role === 'user' || item.role === 'assistant'))
       .map(item => ({
         role: item.role,
-        content: String(item.content || '').trim().slice(0, MAX_CONTENT_LENGTH),
+        content: String(item.content || '').trim().slice(
+          0,
+          item.role === 'assistant' ? MAX_ASSISTANT_CONTENT_LENGTH : MAX_USER_CONTENT_LENGTH,
+        ),
       }))
       .filter(item => item.content)
       .slice(-MAX_MESSAGES);
+
+    let remaining = MAX_HISTORY_CHARACTERS;
+    const withinBudget = [];
+    for (let index = safe.length - 1; index >= 0 && remaining > 0; index -= 1) {
+      const item = safe[index];
+      const content = item.content.length > remaining ? item.content.slice(-remaining) : item.content;
+      if (content) withinBudget.unshift({ role: item.role, content });
+      remaining -= content.length;
+    }
+    return withinBudget;
   }
 
   function sanitizeTask(task) {
@@ -131,11 +146,26 @@
   function buildRequest(conversation, message, context, now) {
     const normalized = normalizeConversation(conversation, now);
     return {
-      message: String(message || '').trim().slice(0, MAX_CONTENT_LENGTH),
+      message: String(message || '').trim().slice(0, MAX_USER_CONTENT_LENGTH),
       context: context || {},
       conversation_id: normalized.conversation_id,
       history: sanitizeHistory(normalized.history),
       task: sanitizeTask(normalized.task),
+      response_preferences: {
+        format: 'markdown',
+        detail: 'comprehensive',
+        allow_continuation: true,
+      },
+    };
+  }
+
+  function contextWindow(conversation, now) {
+    const normalized = normalizeConversation(conversation, now);
+    return {
+      conversation_id: normalized.conversation_id,
+      history: sanitizeHistory(normalized.history),
+      active_task: sanitizeTask(normalized.task),
+      instruction: '结合历史对话回答当前问题，继承已确认的研究对象、时间范围与用户约束；不要把当前问题当作全新会话。',
     };
   }
 
@@ -148,12 +178,15 @@
     STORAGE_KEY,
     TTL_MS,
     MAX_MESSAGES,
+    MAX_USER_CONTENT_LENGTH,
+    MAX_ASSISTANT_CONTENT_LENGTH,
     createConversation,
     sanitizeHistory,
     restore,
     persist,
     appendExchange,
     buildRequest,
+    contextWindow,
     reset,
   };
 });

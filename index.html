@@ -1151,9 +1151,10 @@ document.querySelectorAll('#strategy-toggle span').forEach(function(el) {
 <script src="markdown_renderer.js"></script>
 <script src="stock_research.js"></script>
 <script src="ai_research_task.js"></script>
+<script src="ai_tools.js"></script>
 <script src="ai_conversation.js"></script>
 <script>
-const AI_ENDPOINT = 'https://julong-ai.howtoplay2024.workers.dev/chat';
+const AI_ENDPOINT_BASE = 'https://julong-ai.howtoplay2024.workers.dev';
 const aiInput = document.getElementById('ai-input');
 const aiSend = document.getElementById('ai-send');
 const aiMessages = document.getElementById('ai-messages');
@@ -1230,6 +1231,39 @@ async function aiPageContext(message) {
   };
 }
 
+async function resolveStockForAgentTool(query) {
+  const match = await JuLongStockResearch.resolve(query, activeStockCode());
+  if (!match) return null;
+  return {
+    code: match.code,
+    name: match.stock && match.stock.name,
+    snapshot: match.stock,
+  };
+}
+
+function createReadOnlyAgentRuntime() {
+  return {
+    market: window.MARKET_DATA || { latest: typeof latest !== 'undefined' ? latest : null, data: typeof allData !== 'undefined' ? allData : [] },
+    strategies: {
+      baseline: window.PORTFOLIO_DATA || null,
+      defend: window.PORTFOLIO_DATA_S2 || null,
+      elite: window.PORTFOLIO_DATA_S3 || null,
+    },
+    resolveStock: resolveStockForAgentTool,
+  };
+}
+
+async function postAgent(path, payload) {
+  const response = await fetch(`${AI_ENDPOINT_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || `Agent 请求未完成（${response.status}）`);
+  return result;
+}
+
 function appendAiMessage(role, text, state) {
   const item = document.createElement('div');
   item.className = `ai-message ${role}${state ? ` ${state}` : ''}`;
@@ -1242,6 +1276,22 @@ function appendAiMessage(role, text, state) {
   aiEmpty.classList.add('hidden');
   aiMessages.scrollTop = aiMessages.scrollHeight;
   return item;
+}
+
+function appendAiEvidence(ledger) {
+  const entries = ledger && Array.isArray(ledger.entries) ? ledger.entries : [];
+  const okEntries = entries.filter(entry => entry.status === 'ok');
+  if (!okEntries.length) return;
+  const dates = Array.from(new Set(okEntries
+    .map(entry => entry.source && entry.source.as_of)
+    .filter(Boolean)))
+    .sort();
+  const assets = Array.from(new Set(okEntries
+    .map(entry => entry.source && entry.source.asset)
+    .filter(Boolean)));
+  const dateText = dates.length ? ` · 数据日期 ${dates.join(' / ')}` : '';
+  const assetText = assets.length ? ` · ${assets.join('、')}` : '';
+  appendAiMessage('assistant', `证据 ${okEntries.length} 项${dateText}${assetText}`, 'notice');
 }
 
 function renderAiConversation() {
@@ -1261,18 +1311,30 @@ async function askJuLong(question) {
   try {
     const context = await aiPageContext(message);
     const request = JuLongConversation.buildRequest(aiConversation, message, context);
-    const response = await fetch(AI_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
-    });
-    const result = await response.json();
+    let result;
+    let ledger = null;
+    try {
+      pending.textContent = '正在规划只读研究步骤…';
+      const planned = await postAgent('/plan', request);
+      pending.textContent = '正在读取网站研究数据…';
+      ledger = await JuLongAgentTools.executePlan(planned.plan, createReadOnlyAgentRuntime());
+      pending.textContent = '正在整理证据与研究结论…';
+      result = await postAgent('/report', Object.assign({}, request, {
+        plan: planned.plan,
+        evidence: ledger,
+      }));
+    } catch (agentError) {
+      pending.textContent = '研究工具暂时不可用，正在切换基础对话…';
+      result = await postAgent('/chat', request);
+      ledger = null;
+    }
     const reply = result.answer_markdown || result.reply;
     const finishReason = result.finish_reason || 'stop';
     const truncated = result.truncated === true || finishReason === 'length';
-    if (!response.ok || !reply) throw new Error(result.error || '请求未完成');
+    if (!reply) throw new Error(result.error || '请求未完成');
     pending.remove();
     appendAiMessage('assistant', reply);
+    if (ledger) appendAiEvidence(ledger);
     aiConversation = JuLongConversation.appendExchange(aiConversation, message, reply, result.task_update);
     aiConversation = JuLongConversation.persist(localStorage, aiConversation);
     if (truncated) appendAiMessage('assistant', '回答仍达到长度上限。你可以输入“继续”，我会从中断处接着完成。', 'notice');

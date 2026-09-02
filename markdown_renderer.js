@@ -123,7 +123,7 @@
         continue;
       }
 
-      const heading = line.match(/^(#{1,3})\s+(.+)$/);
+      const heading = line.match(/^(#{1,6})\s+(.+)$/);
       const unordered = line.match(/^\s*[-*+]\s+(.+)$/);
       const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
       if (heading) {

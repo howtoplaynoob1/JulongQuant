@@ -211,6 +211,7 @@
   .ai-message.assistant { align-self: flex-start; border: 1px solid #dfe4eb; background: #fff; color: #313945; border-bottom-left-radius: 3px; }
   .ai-message.error { border-color: #edd3d0; background: #fff8f7; color: #ad4a40; }
   .ai-message.pending { color: #737d8a; }
+  .ai-message.streaming { white-space: pre-wrap; }
   .ai-message.notice { border-color: #d9dfc9; background: #fbfcf6; color: #667044; font-size: 11px; }
   .ai-message h1, .ai-message h2, .ai-message h3 { color: #202631; line-height: 1.35; margin: 13px 0 7px; }
   .ai-message h1 { font-size: 17px; } .ai-message h2 { font-size: 15px; } .ai-message h3 { font-size: 14px; }
@@ -1264,6 +1265,100 @@ async function postAgent(path, payload) {
   return result;
 }
 
+async function postAgentStream(path, payload, onDelta) {
+  const response = await fetch(`${AI_ENDPOINT_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    body: JSON.stringify(Object.assign({}, payload, { stream: true })),
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.error || `Agent 请求未完成（${response.status}）`);
+  }
+  const contentType = response.headers.get('content-type') || '';
+  if (!/text\/event-stream/i.test(contentType) || !response.body) {
+    const result = await response.json().catch(() => ({}));
+    const answer = result.answer_markdown || result.reply || '';
+    if (answer && onDelta) onDelta(answer);
+    return result;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let answer = '';
+  let finishReason = 'stop';
+  let usage = null;
+
+  function consumeLine(rawLine) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith(':') || !line.startsWith('data:')) return;
+    const data = line.slice(5).trim();
+    if (!data || data === '[DONE]') return;
+    let chunk;
+    try { chunk = JSON.parse(data); } catch (_) { return; }
+    const choice = chunk && Array.isArray(chunk.choices) ? chunk.choices[0] : null;
+    const delta = choice && choice.delta && choice.delta.content;
+    if (typeof delta === 'string' && delta) {
+      answer += delta;
+      if (onDelta) onDelta(answer, delta);
+    }
+    if (choice && choice.finish_reason) finishReason = choice.finish_reason;
+    if (chunk && chunk.usage) usage = chunk.usage;
+  }
+
+  while (true) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() || '';
+    lines.forEach(consumeLine);
+    if (done) break;
+  }
+  if (buffer) consumeLine(buffer);
+  if (!answer) throw new Error('AI 未返回有效内容');
+  return {
+    answer_markdown: answer,
+    reply: answer,
+    finish_reason: finishReason,
+    truncated: finishReason === 'length',
+    continued: false,
+    usage: usage ? [usage] : [],
+  };
+}
+
+function strategyFromMessage(message) {
+  if (/防守|defend|s2/i.test(message)) return 'defend';
+  if (/集中|精英|elite|s3/i.test(message)) return 'elite';
+  return 'baseline';
+}
+
+function buildLocalReadOnlyPlan(message, context) {
+  const query = String(message || '').trim();
+  const calls = [];
+  const add = (tool, args) => calls.push({ id: `local-${calls.length + 1}`, tool, args: args || {} });
+  const strategy = strategyFromMessage(query);
+
+  if (/更新到|数据日期|截止日期|新鲜度|最新数据/.test(query)) add('check_data_freshness');
+  if (/持仓|持有哪些|仓位/.test(query)) add('get_portfolio_holdings', { strategy, limit: 20 });
+  if (/三套|三种|各策略|策略.{0,8}(对比|比较|表现)|(?:对比|比较).{0,8}策略/.test(query)) {
+    add('compare_strategies');
+  } else if (/策略|净值|收益|账户/.test(query)) {
+    add('get_strategy_snapshot', { strategy });
+  }
+  if (/市场|大盘|行情|宽度|波动|牛市|熊市|市场状态/.test(query)) add('get_market_snapshot');
+  const stock = context && context.stock;
+  if (stock && /个股|股票|走势|估值|风险|流动性|对比|比较/.test(query)) {
+    add('get_stock_snapshot', { query: stock.code || stock.ts_code || stock.name });
+  }
+
+  return calls.length ? {
+    objective: '使用网站已导出的只读快照回答当前问题',
+    calls: calls.slice(0, 5),
+    local_fallback: true,
+  } : null;
+}
+
 function appendAiMessage(role, text, state) {
   const item = document.createElement('div');
   item.className = `ai-message ${role}${state ? ` ${state}` : ''}`;
@@ -1276,6 +1371,21 @@ function appendAiMessage(role, text, state) {
   aiEmpty.classList.add('hidden');
   aiMessages.scrollTop = aiMessages.scrollHeight;
   return item;
+}
+
+function updateStreamingMessage(item, text) {
+  item.classList.remove('pending', 'error');
+  item.classList.add('streaming');
+  item.dataset.state = 'streaming';
+  item.textContent = text;
+  aiMessages.scrollTop = aiMessages.scrollHeight;
+}
+
+function finalizeStreamingMessage(item, text) {
+  item.classList.remove('pending', 'streaming', 'error');
+  item.dataset.state = '';
+  item.innerHTML = JuLongMarkdown.render(text);
+  aiMessages.scrollTop = aiMessages.scrollHeight;
 }
 
 function appendAiEvidence(ledger) {
@@ -1313,27 +1423,48 @@ async function askJuLong(question) {
     const request = JuLongConversation.buildRequest(aiConversation, message, context);
     let result;
     let ledger = null;
+    let plan = null;
+    pending.textContent = '正在规划只读研究步骤…';
     try {
-      pending.textContent = '正在规划只读研究步骤…';
       const planned = await postAgent('/plan', request);
+      plan = planned.plan;
+    } catch (planningError) {
+      plan = buildLocalReadOnlyPlan(message, context);
+      pending.textContent = plan
+        ? '规划服务波动，正在使用本地只读计划…'
+        : '规划服务波动，正在切换基础对话…';
+    }
+
+    if (plan) {
       pending.textContent = '正在读取网站研究数据…';
-      ledger = await JuLongAgentTools.executePlan(planned.plan, createReadOnlyAgentRuntime());
+      ledger = await JuLongAgentTools.executePlan(plan, createReadOnlyAgentRuntime());
+      const okEntries = ledger.entries.filter(entry => entry.status === 'ok');
+      if (!okEntries.length) {
+        const details = ledger.entries.map(entry => entry.error).filter(Boolean).join('；');
+        throw new Error(`研究数据读取失败${details ? `：${details}` : ''}`);
+      }
       pending.textContent = '正在整理证据与研究结论…';
-      result = await postAgent('/report', Object.assign({}, request, {
-        plan: planned.plan,
-        evidence: ledger,
-      }));
-    } catch (agentError) {
-      pending.textContent = '研究工具暂时不可用，正在切换基础对话…';
-      result = await postAgent('/chat', request);
-      ledger = null;
+      try {
+        result = await postAgentStream('/report', Object.assign({}, request, {
+          plan,
+          evidence: ledger,
+        }), text => updateStreamingMessage(pending, text));
+      } catch (reportError) {
+        pending.classList.add('pending');
+        pending.classList.remove('streaming');
+        pending.textContent = '研究报告生成失败，正在依据已读取证据重试…';
+        result = await postAgentStream('/chat', Object.assign({}, request, {
+          context: Object.assign({}, request.context, { read_only_evidence: ledger }),
+        }), text => updateStreamingMessage(pending, text));
+      }
+    } else {
+      result = await postAgentStream('/chat', request, text => updateStreamingMessage(pending, text));
     }
     const reply = result.answer_markdown || result.reply;
     const finishReason = result.finish_reason || 'stop';
     const truncated = result.truncated === true || finishReason === 'length';
     if (!reply) throw new Error(result.error || '请求未完成');
-    pending.remove();
-    appendAiMessage('assistant', reply);
+    finalizeStreamingMessage(pending, reply);
     if (ledger) appendAiEvidence(ledger);
     aiConversation = JuLongConversation.appendExchange(aiConversation, message, reply, result.task_update);
     aiConversation = JuLongConversation.persist(localStorage, aiConversation);

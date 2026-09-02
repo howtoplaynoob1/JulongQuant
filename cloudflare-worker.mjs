@@ -226,6 +226,44 @@ async function requestCompletion(messages, env, fetchImpl) {
   };
 }
 
+async function requestCompletionStream(messages, env, fetchImpl) {
+  const response = await fetchImpl(DEEPSEEK_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${env.DEEPSEEK_API_KEY}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: env.DEEPSEEK_MODEL || DEFAULT_MODEL,
+      messages,
+      max_tokens: Number(env.DEEPSEEK_MAX_TOKENS) || DEFAULT_MAX_TOKENS,
+      temperature: 0.25,
+      thinking: { type: 'disabled' },
+      stream: true,
+      stream_options: { include_usage: true },
+    }),
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    const upstreamMessage = body && body.error && body.error.message;
+    throw new Error(upstreamMessage || `DeepSeek 请求失败（${response.status}）`);
+  }
+  if (!response.body) throw new Error('DeepSeek 未返回流式内容');
+  return response;
+}
+
+function streamResponse(upstream, origin) {
+  return new Response(upstream.body, {
+    status: 200,
+    headers: {
+      ...corsHeaders(origin),
+      'content-type': 'text/event-stream; charset=utf-8',
+      'cache-control': 'no-cache, no-transform',
+      'x-accel-buffering': 'no',
+    },
+  });
+}
+
 export async function handleRequest(request, env, fetchImpl = fetch) {
   const origin = request.headers.get('origin') || '';
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(origin) });
@@ -265,6 +303,10 @@ export async function handleRequest(request, env, fetchImpl = fetch) {
         ...sanitizeHistory(payload.history),
         { role: 'user', content: message },
       ];
+      if (payload.stream === true) {
+        const upstream = await requestCompletionStream(messages, env, fetchImpl);
+        return streamResponse(upstream, origin);
+      }
       const completion = await requestCompletion(messages, env, fetchImpl);
       return jsonResponse({
         answer_markdown: completion.content,
@@ -278,6 +320,10 @@ export async function handleRequest(request, env, fetchImpl = fetch) {
     }
 
     const messages = buildMessages({ ...payload, message });
+    if (payload.stream === true) {
+      const upstream = await requestCompletionStream(messages, env, fetchImpl);
+      return streamResponse(upstream, origin);
+    }
     const first = await requestCompletion(messages, env, fetchImpl);
     let answer = first.content;
     let finishReason = first.finishReason;

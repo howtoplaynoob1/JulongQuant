@@ -26,6 +26,7 @@
     color: var(--text);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
 
   /* ── Nav ── */
@@ -45,7 +46,7 @@
   }
   .nav-logo span { color: var(--accent); }
   .brand-icon { width: 30px; height: 30px; object-fit: contain; display: block; }
-  .nav-tabs { display: flex; gap: 4px; }
+  .nav-tabs { display: flex; gap: 4px; min-width: 0; }
   .nav-tab {
     padding: 8px 16px; border-radius: 6px; cursor: pointer;
     font-size: 14px; color: var(--text-secondary);
@@ -177,6 +178,72 @@
   .join-cta p { color: rgba(255,255,255,0.76); font-size: 13px; margin: 6px 0 13px; }
   .join-email { display: inline-block; padding: 8px 14px; border-radius: 6px; background: #fff; color: #202733; font-size: 14px; font-weight: 600; text-decoration: none; }
 
+  /* ─── JuLong Intelligence Workbench ─── */
+  .dashboard-intelligence-grid { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: 20px; align-items: stretch; margin-bottom: 20px; }
+  .dashboard-intelligence-grid .status-card { margin: 0; padding: 30px 22px; }
+  .dashboard-intelligence-grid .score-cards { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .dashboard-intelligence-grid .score-card { padding: 12px 9px; }
+  .dashboard-intelligence-grid .score-card-value { font-size: 22px; margin-bottom: 8px; }
+  .dashboard-intelligence-grid .score-trend { font-size: 11px; }
+  .ai-panel { min-width: 0; min-height: 580px; overflow: hidden; border: 1px solid #1d2633; border-radius: 12px; background: #f7f8fa; box-shadow: 0 12px 36px rgba(26,36,50,.13); display: flex; flex-direction: column; }
+  .ai-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px; background: #151c26; color: #fff; }
+  .ai-head-actions { display: flex; align-items: center; gap: 9px; }
+  .ai-new { border: 1px solid rgba(255,255,255,.22); border-radius: 7px; padding: 7px 10px; background: transparent; color: rgba(255,255,255,.8); cursor: pointer; font-size: 11px; transition: .18s ease; }
+  .ai-new:hover { border-color: rgba(255,255,255,.58); color: #fff; transform: translateY(-1px); }
+  .ai-head-title { display: flex; align-items: center; gap: 12px; font-size: 17px; font-family: "Songti SC", STSong, Georgia, serif; font-weight: 700; letter-spacing: .03em; }
+  .ai-brand-mark { width: 32px; height: 32px; display: block; object-fit: contain; filter: invert(1); }
+  .ai-head-note { margin-top: 2px; color: rgba(255,255,255,.58); font: 10px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; }
+  .ai-session-state { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,.62); font-size: 10px; }
+  .ai-session-state::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #68b77a; box-shadow: 0 0 0 4px rgba(104,183,122,.12); }
+  .ai-body { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 16px 17px 14px; background: linear-gradient(145deg, #f2f4f7, #fff 48%); }
+  .ai-intro { color: #566171; font-size: 12px; line-height: 1.7; margin-bottom: 10px; }
+  .ai-prompts { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+  .ai-prompt { border: 1px solid #d6dce5; border-radius: 999px; padding: 6px 10px; color: #344051; background: rgba(255,255,255,.88); font-size: 11px; cursor: pointer; transition: border-color .15s, color .15s, background .15s, transform .15s; }
+  .ai-prompt:hover { border-color: #1a2431; color: #111820; background: #fff; transform: translateY(-1px); }
+  .ai-empty { flex: 1; min-height: 260px; border: 1px dashed #d6dce5; border-radius: 10px; display: grid; place-items: center; padding: 28px; text-align: center; color: #778292; background: rgba(255,255,255,.46); }
+  .ai-empty.hidden { display: none; }
+  .ai-empty strong { display: block; color: #263141; font: 700 20px/1.3 "Songti SC", STSong, Georgia, serif; margin-bottom: 7px; }
+  .ai-empty span { display: block; max-width: 340px; font-size: 12px; line-height: 1.8; }
+  .ai-messages { display: none; flex: 1; min-height: 300px; max-height: 480px; overflow-y: auto; padding: 2px 5px 8px 1px; font-size: 13px; line-height: 1.75; scroll-behavior: smooth; scrollbar-width: thin; }
+  .ai-messages.visible { display: flex; flex-direction: column; gap: 12px; }
+  .ai-message { max-width: 94%; border-radius: 10px; padding: 10px 12px; overflow-wrap: anywhere; }
+  .ai-message.user { align-self: flex-end; background: #1d2632; color: #fff; border-bottom-right-radius: 3px; box-shadow: 0 5px 14px rgba(23,31,42,.12); }
+  .ai-message.assistant { align-self: flex-start; border: 1px solid #dfe4eb; background: #fff; color: #313945; border-bottom-left-radius: 3px; }
+  .ai-message.error { border-color: #edd3d0; background: #fff8f7; color: #ad4a40; }
+  .ai-message.pending { color: #737d8a; }
+  .ai-message.streaming { white-space: pre-wrap; }
+  .ai-message.notice { border-color: #d9dfc9; background: #fbfcf6; color: #667044; font-size: 11px; }
+  .ai-message h1, .ai-message h2, .ai-message h3, .ai-message h4, .ai-message h5, .ai-message h6 { color: #202631; line-height: 1.35; margin: 13px 0 7px; }
+  .ai-message h1 { font-size: 17px; } .ai-message h2 { font-size: 15px; } .ai-message h3 { font-size: 14px; }
+  .ai-message h4 { font-size: 13px; } .ai-message h5, .ai-message h6 { font-size: 12px; }
+  .ai-message h1:first-child, .ai-message h2:first-child, .ai-message h3:first-child, .ai-message h4:first-child, .ai-message h5:first-child, .ai-message h6:first-child { margin-top: 0; }
+  .ai-message p { margin: 0 0 8px; }
+  .ai-message p:last-child { margin-bottom: 0; }
+  .ai-message ul, .ai-message ol { margin: 3px 0 10px 19px; padding: 0; }
+  .ai-message li { margin: 3px 0; }
+  .ai-message blockquote { margin: 9px 0; padding: 4px 0 4px 10px; border-left: 2px solid #aeb8c8; color: #667181; }
+  .ai-message code { padding: 1px 4px; border-radius: 3px; background: #eff1f4; color: #2d3746; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .ai-message pre { overflow-x: auto; margin: 9px 0; padding: 9px; border-radius: 6px; background: #202631; color: #e8edf5; }
+  .ai-message pre code { padding: 0; background: transparent; color: inherit; white-space: pre; }
+  .ai-table-scroll { width: 100%; overflow-x: auto; margin: 10px 0 13px; border: 1px solid #dce2ea; border-radius: 8px; background: #fff; box-shadow: 0 1px 0 rgba(21,28,38,.03); -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  .ai-table-scroll:focus-visible { outline: 2px solid rgba(74,127,193,.48); outline-offset: 2px; }
+  .ai-markdown-table { width: 100%; min-width: 460px; border-collapse: collapse; color: #354052; font-size: 11px; line-height: 1.55; font-variant-numeric: tabular-nums; }
+  .ai-markdown-table th, .ai-markdown-table td { padding: 9px 11px; border-right: 1px solid #e6eaf0; border-bottom: 1px solid #e6eaf0; vertical-align: top; white-space: normal; }
+  .ai-markdown-table th:last-child, .ai-markdown-table td:last-child { border-right: 0; }
+  .ai-markdown-table tbody tr:last-child td { border-bottom: 0; }
+  .ai-markdown-table th { position: sticky; top: 0; z-index: 1; background: #eef1f5; color: #202a38; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+  .ai-markdown-table tbody tr:nth-child(even) { background: #fafbfc; }
+  .ai-markdown-table tbody tr:hover { background: #f3f6f9; }
+  .ai-markdown-table .align-left { text-align: left; }
+  .ai-markdown-table .align-center { text-align: center; }
+  .ai-markdown-table .align-right { text-align: right; }
+  .ai-compose { display: flex; align-items: end; gap: 9px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e4e7ec; }
+  .ai-input { width: auto; min-width: 0; flex: 1 1 auto; min-height: 46px; max-height: 128px; resize: none; border: 1px solid #cfd6e0; border-radius: 9px; padding: 11px 12px; color: #202833; background: #fff; font: 13px/1.55 "PingFang SC", "Microsoft YaHei", sans-serif; outline: none; }
+  .ai-input:focus { border-color: #171a20; box-shadow: 0 0 0 3px rgba(23,26,32,.08); }
+  .ai-send { height: 46px; flex: 0 0 auto; border: 0; border-radius: 9px; padding: 0 15px; background: #171f2a; color: #fff; font-size: 12px; font-weight: 650; cursor: pointer; }
+  .ai-send:disabled { cursor: not-allowed; opacity: .5; }
+  .ai-compose-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: #8a93a0; font-size: 9px; line-height: 1.55; }
+
   /* ── Footer ── */
   .global-footer {
     text-align: center; font-size: 13px; color: var(--text-secondary);
@@ -238,7 +305,11 @@
   @media (max-width: 768px) {
     .container { padding: 12px; }
     .nav-inner { padding: 0 12px; height: 50px; }
-    .nav-logo { font-size: 14px; margin-right: 12px; }
+    .nav-logo { margin-right: 8px; flex: 0 0 auto; }
+    .nav-logo span { display: none; }
+    .nav-tabs { flex: 1 1 auto; overflow-x: auto; scrollbar-width: none; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab { flex: 0 0 auto; }
     .nav-tab { padding: 5px 8px; font-size: 12px; }
     .card { padding: 16px; }
     .status-card { padding: 24px 16px; }
@@ -260,6 +331,18 @@
     .pf-card { min-width: 100px; padding: 10px 6px; }
     .pf-card-value { font-size: 18px; }
     .holdings-grid { flex-direction: column; gap: 16px; }
+    .dashboard-intelligence-grid { grid-template-columns: minmax(0, 1fr); }
+    .dashboard-intelligence-grid .status-card { min-width: 0; }
+    .ai-panel { order: -1; min-height: 560px; }
+    .ai-messages { max-height: 520px; }
+    .ai-head { padding: 16px; gap: 10px; }
+    .ai-head-actions { flex: 0 0 auto; }
+    .ai-session-state { display: none; }
+    .ai-body { padding: 14px; }
+    .ai-prompts { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 3px; scrollbar-width: none; }
+    .ai-prompts::-webkit-scrollbar { display: none; }
+    .ai-prompt { flex: 0 0 auto; }
+    .ai-compose-meta span:last-child { display: none; }
   }
   @media (max-width: 380px) {
     .nav-tab { padding: 4px 6px; font-size: 11px; }
@@ -287,7 +370,38 @@
 
   <!-- Dashboard -->
   <div class="page active" id="page-dashboard">
-    <div class="card status-card" id="status-card"></div>
+    <div class="dashboard-intelligence-grid">
+      <div class="card status-card" id="status-card"></div>
+      <section class="ai-panel" id="ai-workbench" aria-label="巨龙智策投研工作台">
+        <div class="ai-head">
+          <div class="ai-head-title">
+            <img class="ai-brand-mark" src="icon.png" alt="">
+            <div>巨龙智策<div class="ai-head-note">Quant Research Copilot</div></div>
+          </div>
+          <div class="ai-head-actions">
+            <span class="ai-session-state">上下文已连接</span>
+            <button class="ai-new" id="ai-new" type="button">新建研究</button>
+          </div>
+        </div>
+        <div class="ai-body">
+          <p class="ai-intro">围绕当前市场、策略与个股快照连续研究；刷新页面后仍保留本次会话。</p>
+          <div class="ai-prompts" id="ai-prompts">
+            <button class="ai-prompt" type="button">解读今日市场状态</button>
+            <button class="ai-prompt" type="button">研究一下贵州茅台</button>
+            <button class="ai-prompt" type="button">本周策略表现如何理解？</button>
+          </div>
+          <div class="ai-empty" id="ai-empty">
+            <div><strong>从一个研究问题开始</strong><span>可以直接输入股票名称、六位代码或市场问题，后续使用“它”“继续”“和刚才相比”等自然语言追问。</span></div>
+          </div>
+          <div class="ai-messages" id="ai-messages" aria-live="polite"></div>
+          <div class="ai-compose">
+            <textarea class="ai-input" id="ai-input" rows="2" maxlength="4000" placeholder="输入股票名称、代码或研究问题；Shift + Enter 换行…"></textarea>
+            <button class="ai-send" id="ai-send" type="button" aria-label="发送问题">发送 ↑</button>
+          </div>
+          <div class="ai-compose-meta"><span>会话保留 24 小时 · 最多 20 条上下文</span><span>仅供量化研究展示，不构成投资建议</span></div>
+        </div>
+      </section>
+    </div>
     <div class="card">
       <div class="chart-header">
         <h3>市场净值走势</h3>
@@ -1036,5 +1150,351 @@ document.querySelectorAll('#strategy-toggle span').forEach(function(el) {
 })();
 </script>
 
+<script src="markdown_renderer.js"></script>
+<script src="stock_research.js"></script>
+<script src="ai_research_task.js"></script>
+<script src="ai_tools.js"></script>
+<script src="ai_conversation.js"></script>
+<script>
+const AI_ENDPOINT_BASE = 'https://julong-ai.howtoplay2024.workers.dev';
+const aiInput = document.getElementById('ai-input');
+const aiSend = document.getElementById('ai-send');
+const aiMessages = document.getElementById('ai-messages');
+const aiEmpty = document.getElementById('ai-empty');
+const aiNew = document.getElementById('ai-new');
+let aiConversation = JuLongConversation.restore(localStorage);
+
+function activeStockCode() {
+  const task = aiConversation && aiConversation.task && aiConversation.task.research_task;
+  const entity = task && Array.isArray(task.entities) ? task.entities[0] : null;
+  return entity && entity.value ? entity.value : null;
+}
+
+function stockDimensions(message) {
+  const value = String(message || '');
+  const dimensions = [];
+  if (/估值|市盈率|市净率|PE|PB/i.test(value)) dimensions.push('valuation');
+  if (/风险|波动|回撤/.test(value)) dimensions.push('risk', 'volatility');
+  if (/成交|换手|流动性/.test(value)) dimensions.push('liquidity');
+  if (/走势|涨跌|收益|表现/.test(value)) dimensions.push('trend', 'return');
+  return dimensions.length ? Array.from(new Set(dimensions)) : ['trend', 'return', 'volatility', 'valuation', 'liquidity'];
+}
+
+function activateStockResearch(match, message) {
+  const stock = match.stock;
+  const researchTask = JuLongResearchTask.resolveTask({
+    domain: { value: 'stock', source: match.source, confidence: 1 },
+    action: { value: 'analyze', source: 'inferred', confidence: 0.9 },
+    entities: [{
+      value: stock.ts_code || stock.code,
+      name: stock.name,
+      source: match.source,
+      confidence: 1,
+    }],
+    dimensions: stockDimensions(message),
+    time_range: { value: '60d', source: 'defaulted', confidence: 1 },
+    frequency: { value: 'daily', source: 'defaulted', confidence: 1 },
+    original_message: message,
+  }, aiConversation.task && aiConversation.task.research_task);
+  aiConversation.task = {
+    subject: 'stock',
+    goal: 'stock_research',
+    time_range: '60d',
+    research_task: researchTask,
+  };
+  aiConversation = JuLongConversation.persist(localStorage, aiConversation);
+}
+
+async function aiPageContext(message) {
+  const portfolio = window.PORTFOLIO_DATA && window.PORTFOLIO_DATA.latest;
+  let stockMatch = null;
+  let stockDataWarning = null;
+  try {
+    stockMatch = await JuLongStockResearch.resolve(message, activeStockCode());
+    if (stockMatch) activateStockResearch(stockMatch, message);
+  } catch (error) {
+    stockDataWarning = error && error.message ? error.message : '个股研究数据暂时不可用';
+  }
+  return {
+    market: typeof latest !== 'undefined' && latest ? {
+      date: latest.date, regime: latest.regime, regime_cn: latest.regime_cn,
+      advice: latest.advice, regime_score: latest.regime_score,
+      trend_score: latest.trend_score, breadth_score: latest.breadth_score,
+      vol_percentile: latest.vol_percentile, state_age: latest.state_age,
+    } : null,
+    strategy: portfolio ? {
+      date: portfolio.date, nav: portfolio.nav, cumulative_return_pct: portfolio.cum_return_pct,
+      daily_return_pct: portfolio.daily_return_pct, invested_pct: portfolio.invested_pct,
+      n_positions: portfolio.n_positions,
+    } : null,
+    stock: stockMatch ? stockMatch.stock : null,
+    stock_data_warning: stockDataWarning,
+    conversation: JuLongConversation.contextWindow(aiConversation),
+  };
+}
+
+async function resolveStockForAgentTool(query) {
+  const match = await JuLongStockResearch.resolve(query, activeStockCode());
+  if (!match) return null;
+  return {
+    code: match.code,
+    name: match.stock && match.stock.name,
+    snapshot: match.stock,
+  };
+}
+
+function createReadOnlyAgentRuntime() {
+  return {
+    market: window.MARKET_DATA || { latest: typeof latest !== 'undefined' ? latest : null, data: typeof allData !== 'undefined' ? allData : [] },
+    strategies: {
+      baseline: window.PORTFOLIO_DATA || null,
+      defend: window.PORTFOLIO_DATA_S2 || null,
+      elite: window.PORTFOLIO_DATA_S3 || null,
+    },
+    resolveStock: resolveStockForAgentTool,
+  };
+}
+
+async function postAgent(path, payload) {
+  const response = await fetch(`${AI_ENDPOINT_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || `Agent 请求未完成（${response.status}）`);
+  return result;
+}
+
+async function postAgentStream(path, payload, onDelta) {
+  const response = await fetch(`${AI_ENDPOINT_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    body: JSON.stringify(Object.assign({}, payload, { stream: true })),
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.error || `Agent 请求未完成（${response.status}）`);
+  }
+  const contentType = response.headers.get('content-type') || '';
+  if (!/text\/event-stream/i.test(contentType) || !response.body) {
+    const result = await response.json().catch(() => ({}));
+    const answer = result.answer_markdown || result.reply || '';
+    if (answer && onDelta) onDelta(answer);
+    return result;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let answer = '';
+  let finishReason = 'stop';
+  let usage = null;
+
+  function consumeLine(rawLine) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith(':') || !line.startsWith('data:')) return;
+    const data = line.slice(5).trim();
+    if (!data || data === '[DONE]') return;
+    let chunk;
+    try { chunk = JSON.parse(data); } catch (_) { return; }
+    const choice = chunk && Array.isArray(chunk.choices) ? chunk.choices[0] : null;
+    const delta = choice && choice.delta && choice.delta.content;
+    if (typeof delta === 'string' && delta) {
+      answer += delta;
+      if (onDelta) onDelta(answer, delta);
+    }
+    if (choice && choice.finish_reason) finishReason = choice.finish_reason;
+    if (chunk && chunk.usage) usage = chunk.usage;
+  }
+
+  while (true) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() || '';
+    lines.forEach(consumeLine);
+    if (done) break;
+  }
+  if (buffer) consumeLine(buffer);
+  if (!answer) throw new Error('AI 未返回有效内容');
+  return {
+    answer_markdown: answer,
+    reply: answer,
+    finish_reason: finishReason,
+    truncated: finishReason === 'length',
+    continued: false,
+    usage: usage ? [usage] : [],
+  };
+}
+
+function strategyFromMessage(message) {
+  if (/防守|defend|s2/i.test(message)) return 'defend';
+  if (/集中|精英|elite|s3/i.test(message)) return 'elite';
+  return 'baseline';
+}
+
+function buildLocalReadOnlyPlan(message, context) {
+  const query = String(message || '').trim();
+  const calls = [];
+  const add = (tool, args) => calls.push({ id: `local-${calls.length + 1}`, tool, args: args || {} });
+  const strategy = strategyFromMessage(query);
+
+  if (/更新到|数据日期|截止日期|新鲜度|最新数据/.test(query)) add('check_data_freshness');
+  if (/持仓|持有哪些|仓位/.test(query)) add('get_portfolio_holdings', { strategy, limit: 20 });
+  if (/三套|三种|各策略|策略.{0,8}(对比|比较|表现)|(?:对比|比较).{0,8}策略/.test(query)) {
+    add('compare_strategies');
+  } else if (/策略|净值|收益|账户/.test(query)) {
+    add('get_strategy_snapshot', { strategy });
+  }
+  if (/市场|大盘|行情|宽度|波动|牛市|熊市|市场状态/.test(query)) add('get_market_snapshot');
+  const stock = context && context.stock;
+  if (stock && /个股|股票|走势|估值|风险|流动性|对比|比较/.test(query)) {
+    add('get_stock_snapshot', { query: stock.code || stock.ts_code || stock.name });
+  }
+
+  return calls.length ? {
+    objective: '使用网站已导出的只读快照回答当前问题',
+    calls: calls.slice(0, 5),
+    local_fallback: true,
+  } : null;
+}
+
+function appendAiMessage(role, text, state) {
+  const item = document.createElement('div');
+  item.className = `ai-message ${role}${state ? ` ${state}` : ''}`;
+  item.dataset.state = state || '';
+  item.innerHTML = role === 'assistant' && state !== 'error'
+    ? JuLongMarkdown.render(text)
+    : JuLongMarkdown.escapeHtml(text).replace(/\n/g, '<br>');
+  aiMessages.appendChild(item);
+  aiMessages.classList.add('visible');
+  aiEmpty.classList.add('hidden');
+  aiMessages.scrollTop = aiMessages.scrollHeight;
+  return item;
+}
+
+function updateStreamingMessage(item, text) {
+  item.classList.remove('pending', 'error');
+  item.classList.add('streaming');
+  item.dataset.state = 'streaming';
+  item.textContent = text;
+  aiMessages.scrollTop = aiMessages.scrollHeight;
+}
+
+function finalizeStreamingMessage(item, text) {
+  item.classList.remove('pending', 'streaming', 'error');
+  item.dataset.state = '';
+  item.innerHTML = JuLongMarkdown.render(text);
+  aiMessages.scrollTop = aiMessages.scrollHeight;
+}
+
+function appendAiEvidence(ledger) {
+  const entries = ledger && Array.isArray(ledger.entries) ? ledger.entries : [];
+  const okEntries = entries.filter(entry => entry.status === 'ok');
+  if (!okEntries.length) return;
+  const dates = Array.from(new Set(okEntries
+    .map(entry => entry.source && entry.source.as_of)
+    .filter(Boolean)))
+    .sort();
+  const assets = Array.from(new Set(okEntries
+    .map(entry => entry.source && entry.source.asset)
+    .filter(Boolean)));
+  const dateText = dates.length ? ` · 数据日期 ${dates.join(' / ')}` : '';
+  const assetText = assets.length ? ` · ${assets.join('、')}` : '';
+  appendAiMessage('assistant', `证据 ${okEntries.length} 项${dateText}${assetText}`, 'notice');
+}
+
+function renderAiConversation() {
+  aiMessages.innerHTML = '';
+  aiConversation.history.forEach(message => appendAiMessage(message.role, message.content));
+  aiMessages.classList.toggle('visible', aiConversation.history.length > 0);
+  aiEmpty.classList.toggle('hidden', aiConversation.history.length > 0);
+}
+
+async function askJuLong(question) {
+  const message = (question || '').trim();
+  if (!message) return;
+  aiInput.value = '';
+  aiSend.disabled = true;
+  appendAiMessage('user', message);
+  const pending = appendAiMessage('assistant', '正在读取当前研究上下文…', 'pending');
+  try {
+    const context = await aiPageContext(message);
+    const request = JuLongConversation.buildRequest(aiConversation, message, context);
+    let result;
+    let ledger = null;
+    let plan = null;
+    pending.textContent = '正在规划只读研究步骤…';
+    try {
+      const planned = await postAgent('/plan', request);
+      plan = planned.plan;
+    } catch (planningError) {
+      plan = buildLocalReadOnlyPlan(message, context);
+      pending.textContent = plan
+        ? '规划服务波动，正在使用本地只读计划…'
+        : '规划服务波动，正在切换基础对话…';
+    }
+
+    if (plan) {
+      pending.textContent = '正在读取网站研究数据…';
+      ledger = await JuLongAgentTools.executePlan(plan, createReadOnlyAgentRuntime());
+      const okEntries = ledger.entries.filter(entry => entry.status === 'ok');
+      if (!okEntries.length) {
+        const details = ledger.entries.map(entry => entry.error).filter(Boolean).join('；');
+        throw new Error(`研究数据读取失败${details ? `：${details}` : ''}`);
+      }
+      pending.textContent = '正在整理证据与研究结论…';
+      try {
+        result = await postAgentStream('/report', Object.assign({}, request, {
+          plan,
+          evidence: ledger,
+        }), text => updateStreamingMessage(pending, text));
+      } catch (reportError) {
+        pending.classList.add('pending');
+        pending.classList.remove('streaming');
+        pending.textContent = '研究报告生成失败，正在依据已读取证据重试…';
+        result = await postAgentStream('/chat', Object.assign({}, request, {
+          context: Object.assign({}, request.context, { read_only_evidence: ledger }),
+        }), text => updateStreamingMessage(pending, text));
+      }
+    } else {
+      result = await postAgentStream('/chat', request, text => updateStreamingMessage(pending, text));
+    }
+    const reply = result.answer_markdown || result.reply;
+    const finishReason = result.finish_reason || 'stop';
+    const truncated = result.truncated === true || finishReason === 'length';
+    if (!reply) throw new Error(result.error || '请求未完成');
+    finalizeStreamingMessage(pending, reply);
+    if (ledger) appendAiEvidence(ledger);
+    aiConversation = JuLongConversation.appendExchange(aiConversation, message, reply, result.task_update);
+    aiConversation = JuLongConversation.persist(localStorage, aiConversation);
+    if (truncated) appendAiMessage('assistant', '回答仍达到长度上限。你可以输入“继续”，我会从中断处接着完成。', 'notice');
+  } catch (error) {
+    pending.remove();
+    appendAiMessage('assistant', error.message || '暂时无法连接巨龙智策，请稍后重试。', 'error');
+  } finally {
+    aiSend.disabled = false;
+    aiInput.focus();
+  }
+}
+
+aiNew.addEventListener('click', () => {
+  aiConversation = JuLongConversation.reset(localStorage);
+  renderAiConversation();
+  aiInput.value = '';
+  aiInput.focus();
+});
+aiSend.addEventListener('click', () => askJuLong(aiInput.value));
+aiInput.addEventListener('keydown', event => {
+  if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); askJuLong(aiInput.value); }
+});
+aiInput.addEventListener('input', () => {
+  aiInput.style.height = 'auto';
+  aiInput.style.height = `${Math.min(aiInput.scrollHeight, 128)}px`;
+});
+document.querySelectorAll('.ai-prompt').forEach(button => button.addEventListener('click', () => askJuLong(button.textContent)));
+renderAiConversation();
+</script>
 </body>
 </html>

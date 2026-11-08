@@ -130,6 +130,14 @@
   }
   .chart-header h3 { font-size: 16px; font-weight: 600; }
   .chart-hint { font-size: 12px; color: var(--text-secondary); }
+  .pf-chart-header { flex-wrap: wrap; gap: 12px; }
+  .pf-chart-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pf-range-group { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid #e5e9ef; border-radius: 8px; background: #f7f9fc; }
+  .pf-range-button { border: 0; border-radius: 5px; padding: 5px 10px; background: transparent; color: #697586; font: inherit; font-size: 12px; cursor: pointer; }
+  .pf-range-button:hover { color: #315d98; }
+  .pf-range-button[aria-pressed="true"] { background: #fff; color: #315d98; box-shadow: 0 1px 3px rgba(23, 40, 68, .13); font-weight: 600; }
+  .pf-range-button:focus-visible { outline: 2px solid #4a7fc1; outline-offset: 2px; }
+  .pf-chart-note { color: #8a95a3; font-size: 12px; margin: 5px 0 0; }
 
   /* ── Data Info ── */
   .info-section { margin-bottom: 24px; }
@@ -460,11 +468,19 @@
       <div class="pf-cards" id="pf-cards"></div>
     </div>
     <div class="card">
-      <div class="chart-header">
+      <div class="chart-header pf-chart-header">
         <h3>净值走势</h3>
-        <span class="chart-hint">策略 vs 基准 · 7/20 起</span>
+        <div class="pf-chart-controls">
+          <span class="chart-hint">策略 vs 基准 · 日频净值</span>
+          <div class="pf-range-group" role="group" aria-label="净值图时间范围">
+            <button class="pf-range-button" type="button" data-pf-range="1" aria-pressed="false">近 1 月</button>
+            <button class="pf-range-button" type="button" data-pf-range="3" aria-pressed="false">近 3 月</button>
+            <button class="pf-range-button" type="button" data-pf-range="all" aria-pressed="true">全部</button>
+          </div>
+        </div>
       </div>
       <div class="chart-container tall" id="pf-chart-nav"></div>
+      <p class="pf-chart-note">每日收盘净值 · 悬停查看明细，拖动下方滑块可缩放区间</p>
     </div>
     <div class="card">
       <div class="holdings-grid" id="pf-holdings"></div>
@@ -946,6 +962,24 @@ function initRegimeCharts() {
 
 // ════════ Portfolio Page ════════
 let _currentStrategy = 's1';
+let _pfRange = 'all';
+function pfRangeStart(dates, range) {
+  if (!dates.length || range === 'all' || !range) return dates[0];
+  const end = new Date(dates[dates.length - 1] + 'T00:00:00Z');
+  if (Number.isNaN(end.getTime())) return dates[0];
+  const day = end.getUTCDate();
+  end.setUTCDate(1);
+  end.setUTCMonth(end.getUTCMonth() - Number(range));
+  const lastDay = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0)).getUTCDate();
+  end.setUTCDate(Math.min(day, lastDay));
+  const cutoff = end.toISOString().slice(0, 10);
+  return dates.find(date => date >= cutoff) || dates[0];
+}
+function updatePfRangeButtons(range) {
+  document.querySelectorAll('[data-pf-range]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.pfRange === range));
+  });
+}
 function renderPortfolio() {
   const pf = _currentStrategy === 's1' ? window.PORTFOLIO_DATA : (_currentStrategy === 's2' ? window.PORTFOLIO_DATA_S2 : window.PORTFOLIO_DATA_S3);
   if (!pf) return;
@@ -993,10 +1027,12 @@ function renderPortfolio() {
   const dates = hist.map(d => d.date);
   const navVals = hist.map(d => d.nav);
   const benchVals = hist.map(d => d.zz1500_nav);
+  const rangeStart = pfRangeStart(dates, _pfRange);
 
   chart.setOption({
     tooltip: {
       trigger: 'axis',
+      axisPointer: { type: 'cross', lineStyle: { color: '#9aabc0', width: 1, type: 'dashed' }, crossStyle: { color: '#9aabc0', type: 'dashed' }, label: { backgroundColor: '#33465d' } },
       formatter: function(params) {
         const idx = params[0].dataIndex;
         const d = hist[idx];
@@ -1007,15 +1043,28 @@ function renderPortfolio() {
     legend: { data: ['策略净值', '基准'], top: 5, textStyle: { fontSize: 12, color: '#666' }, icon: 'rect', itemWidth: 20, itemHeight: 2 },
     grid: { left: 55, right: 20, top: 40, bottom: 50 },
     xAxis: { type: 'category', data: dates, axisLabel: { color: '#999' }, axisLine: { lineStyle: { color: '#ddd' } } },
-    yAxis: { type: 'value', scale: true, axisLabel: { color: '#999' }, splitLine: { lineStyle: { color: '#f0f0f0' } } },
+    yAxis: { type: 'value', scale: true, splitNumber: 6, axisLabel: { color: '#8793a2', formatter: value => Number(value).toFixed(3), fontVariant: 'tabular-nums' }, splitLine: { lineStyle: { color: '#edf0f4' } } },
     series: [
-      { name: '策略净值', type: 'line', data: navVals, showSymbol: false, lineStyle: { width: 1.8, color: '#4a7fc1' }, areaStyle: { color: 'rgba(74,127,193,0.06)' } },
-      { name: '基准', type: 'line', data: benchVals, showSymbol: false, lineStyle: { width: 1.2, color: '#999', type: 'dashed' } },
+      { name: '策略净值', type: 'line', data: navVals, showSymbol: false, symbol: 'circle', symbolSize: 7, itemStyle: { color: '#4a7fc1' }, lineStyle: { width: 1.8, color: '#4a7fc1' }, areaStyle: { color: 'rgba(74,127,193,0.06)' }, emphasis: { focus: 'series' } },
+      { name: '基准', type: 'line', data: benchVals, showSymbol: false, symbol: 'circle', symbolSize: 6, itemStyle: { color: '#999' }, lineStyle: { width: 1.2, color: '#999', type: 'dashed' } },
     ],
     dataZoom: [
-      { type: 'inside', zoomOnMouseWheel: true, moveOnMouseWheel: false, moveOnMouseMove: false },
-      { type: 'slider', bottom: 10, height: 18, borderColor: '#ddd', fillerColor: 'rgba(74,127,193,0.1)', handleStyle: { color: '#4a7fc1' } }
+      { type: 'inside', startValue: rangeStart, endValue: dates[dates.length - 1], zoomOnMouseWheel: true, moveOnMouseWheel: false, moveOnMouseMove: false },
+      { type: 'slider', startValue: rangeStart, endValue: dates[dates.length - 1], bottom: 10, height: 18, borderColor: '#ddd', fillerColor: 'rgba(74,127,193,0.1)', handleStyle: { color: '#4a7fc1' } }
     ],
+  });
+  updatePfRangeButtons(_pfRange);
+  chart.on('dataZoom', function() {
+    _pfRange = null;
+    updatePfRangeButtons(_pfRange);
+  });
+  document.querySelectorAll('[data-pf-range]').forEach(button => {
+    button.onclick = function() {
+      const range = button.dataset.pfRange;
+      chart.dispatchAction({ type: 'dataZoom', startValue: pfRangeStart(dates, range), endValue: dates[dates.length - 1] });
+      _pfRange = range;
+      updatePfRangeButtons(range);
+    };
   });
   window.addEventListener('resize', () => chart.resize());
 
